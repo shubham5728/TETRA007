@@ -1,4 +1,3 @@
-# AURA CareLink
 
 <div align="center">
 
