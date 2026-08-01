@@ -3,7 +3,10 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+import os
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+_is_vercel = os.environ.get("VERCEL") == "1"
 
 
 class Settings(BaseSettings):
@@ -14,9 +17,6 @@ class Settings(BaseSettings):
     app_name: str = "AURA CareLink API"
     api_version: str = "0.1.0"
 
-    import os
-    _is_vercel = os.environ.get("VERCEL") == "1"
-    
     # SQLite keeps the prototype self-contained. The URL is the only thing that
     # has to change to move to PostgreSQL — SQLAlchemy handles the rest.
     database_url: str = f"sqlite:///{'/tmp/aura.db' if _is_vercel else (BASE_DIR / 'aura.db')}"
