@@ -16,7 +16,6 @@ export default function CaregiverPortalView() {
   const medications = useApi("/api/patient/medications");
   const appointments = useApi("/api/patient/appointments");
   const [ackId, setAckId] = useState(null);
-  const [sosSending, setSosSending] = useState(false);
 
   const sources = [twin, alerts, medications, appointments];
   const loading = sources.some((source) => source.loading);
@@ -42,16 +41,6 @@ export default function CaregiverPortalView() {
       await alerts.reload();
     } finally {
       setAckId(null);
-    }
-  }
-
-  async function triggerSos() {
-    setSosSending(true);
-    try {
-      await api.post("/api/patient/sos", {});
-      await alerts.reload();
-    } finally {
-      setSosSending(false);
     }
   }
 
@@ -172,12 +161,10 @@ export default function CaregiverPortalView() {
 
           <button
             type="button"
-            disabled={sosSending}
-            onClick={triggerSos}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-risk-high px-4 py-3.5 font-display text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-risk-high px-4 py-3.5 font-display text-sm font-semibold text-white transition hover:opacity-90"
           >
             <Icon name="alert" className="size-4.5" />
-            {sosSending ? "Sending Alert..." : "Emergency SOS — call care team"}
+            Emergency SOS — call care team
           </button>
         </Card>
 

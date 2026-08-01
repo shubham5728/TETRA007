@@ -9,7 +9,13 @@ import { API_BASE, clearSession } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { useApi, useSession } from "@/lib/useApi";
 
-const LANGUAGES = ["English", "हिन्दी", "தமிழ்", "ગુજરાતી"];
+import { useEffect, useState } from "react";
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "gu", label: "ગુજરાતી" }
+];
 
 export default function SettingsView() {
   const router = useRouter();
@@ -30,6 +36,19 @@ export default function SettingsView() {
         onRetry={() => sources.forEach((source) => source.reload())}
       />
     );
+  }
+
+  const [langCode, setLangCode] = useState("en");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLangCode(localStorage.getItem("aura.lang") || "en");
+    }
+  }, []);
+
+  function changeLang(code) {
+    setLangCode(code);
+    localStorage.setItem("aura.lang", code);
   }
 
   function signOut() {
@@ -72,10 +91,17 @@ export default function SettingsView() {
             hint="Used across the app and by the AI assistant."
           />
           <div className="flex flex-wrap gap-2">
-            {LANGUAGES.map((language, index) => (
-              <Pill key={language} tone={index === 2 ? "brand" : "neutral"}>
-                {language}
-              </Pill>
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => changeLang(lang.code)}
+                className="focus:outline-none"
+              >
+                <Pill tone={langCode === lang.code ? "brand" : "neutral"}>
+                  {lang.label}
+                </Pill>
+              </button>
             ))}
           </div>
 

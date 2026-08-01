@@ -176,7 +176,19 @@ export default function DashboardView() {
 
         <div className="space-y-5">
           <Card>
-            <CardTitle eyebrow="Next visit" title="Upcoming appointment" />
+            <CardTitle 
+              eyebrow="Next visit" 
+              title="Upcoming appointment"
+              action={
+                <a 
+                  href="/appointments"
+                  className="px-3 py-1.5 bg-brand text-white text-sm font-semibold rounded-full flex items-center gap-1 hover:bg-brand/90 transition-colors"
+                >
+                  <Icon name="calendar" className="size-3.5" />
+                  Book
+                </a>
+              }
+            />
             {nextAppointment ? (
               <div className="rounded-2xl bg-surface-soft p-4">
                 <p className="font-display font-semibold text-ink">

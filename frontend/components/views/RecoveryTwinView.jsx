@@ -13,7 +13,7 @@ import {
   RiskPill,
   StatTile,
 } from "@/components/ui";
-import { api, getUser } from "@/lib/api";
+import { api } from "@/lib/api";
 import { formatDate, timeAgo } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -94,79 +94,6 @@ function SymptomLogger({ onLogged }) {
   );
 }
 
-function PrescribeMedication({ onPrescribed }) {
-  const [name, setName] = useState("");
-  const [dose, setDose] = useState("");
-  const [schedule, setSchedule] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(null);
-
-  async function submit(event) {
-    event.preventDefault();
-    if (!name.trim() || !dose.trim() || !schedule.trim() || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await api.post("/api/patient/medications", { 
-        name: name.trim(), 
-        dose: dose.trim(), 
-        schedule: schedule.trim() 
-      });
-      setName("");
-      setDose("");
-      setSchedule("");
-      await onPrescribed?.();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <form onSubmit={submit} className="mt-5 border-t border-line pt-4 space-y-3">
-      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-ink-faint">
-        Prescribe Medication
-      </p>
-      <div className="grid gap-2 sm:grid-cols-3">
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Medication name"
-          disabled={busy}
-          className="rounded-xl border border-line bg-surface-soft px-4 py-2.5 text-sm outline-none transition focus:border-brand"
-        />
-        <input
-          value={dose}
-          onChange={(event) => setDose(event.target.value)}
-          placeholder="Dose (e.g. 500mg)"
-          disabled={busy}
-          className="rounded-xl border border-line bg-surface-soft px-4 py-2.5 text-sm outline-none transition focus:border-brand"
-        />
-        <input
-          value={schedule}
-          onChange={(event) => setSchedule(event.target.value)}
-          placeholder="Schedule (e.g. BID)"
-          disabled={busy}
-          className="rounded-xl border border-line bg-surface-soft px-4 py-2.5 text-sm outline-none transition focus:border-brand"
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={!name.trim() || !dose.trim() || !schedule.trim() || busy}
-        className="w-full rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
-      >
-        {busy ? "Prescribing…" : "Prescribe"}
-      </button>
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-risk-high">
-          {error}
-        </p>
-      ) : null}
-    </form>
-  );
-}
-
 export default function RecoveryTwinView() {
   const twin = useApi("/api/recovery-twin");
   const medications = useApi("/api/patient/medications");
@@ -188,8 +115,6 @@ export default function RecoveryTwinView() {
   }
 
   const patient = twin.data.patient;
-  const user = getUser();
-  const isDoctorOrAdmin = user?.role === "doctor" || user?.role === "admin";
 
   async function refresh() {
     await Promise.all([twin.reload(), medications.reload(), symptoms.reload()]);
@@ -299,9 +224,6 @@ export default function RecoveryTwinView() {
             onChange={refresh}
             showPlain={false}
           />
-          {isDoctorOrAdmin && (
-            <PrescribeMedication onPrescribed={() => Promise.all([medications.reload(), twin.reload()])} />
-          )}
         </Card>
 
         <Card>

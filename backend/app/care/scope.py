@@ -59,29 +59,12 @@ TOPIC_KEYWORDS: dict[str, tuple[str, ...]] = {
         "scheme", "pm-jay", "pmjay", "jan arogya", "ayushman", "abha",
         "insurance", "government health", "free treatment", "health card",
     ),
-    # Deliberately specific. A bare "what is" would swallow every off-topic
-    # question ("what is the cricket score?") and defeat the scope guard.
     "education": (
-        "blood pressure", "bp", "diabetes", "diabetic", "sugar level",
-        "blood sugar", "cholesterol", "hygiene", "infection prevention",
-        "why is sugar", "why do i need", "importance of",
+        "blood pressure", "bp", "diabetes", "sugar level", "cholesterol",
+        "hygiene", "infection prevention", "why is", "what is",
+        "importance of", "how does",
     ),
 }
-
-# Checked in this order — the first match wins. Symptoms come first because
-# they drive triage, and "recovery score" must resolve to the twin rather than
-# to general recovery advice.
-TOPIC_PRIORITY: tuple[str, ...] = (
-    "symptom",
-    "twin",
-    "medication",
-    "appointment",
-    "scheme",
-    "discharge",
-    "education",
-    "diet",
-    "recovery",
-)
 
 # --------------------------------------------------------------------- blocked
 
@@ -143,12 +126,11 @@ def _contains(text: str, phrase: str) -> bool:
 
 
 def detect_topics(text: str) -> list[str]:
-    """Matching topics, most specific first."""
     lowered = text.lower()
     return [
         topic
-        for topic in TOPIC_PRIORITY
-        if any(_contains(lowered, keyword) for keyword in TOPIC_KEYWORDS[topic])
+        for topic, keywords in TOPIC_KEYWORDS.items()
+        if any(_contains(lowered, keyword) for keyword in keywords)
     ]
 
 

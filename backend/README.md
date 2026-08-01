@@ -69,54 +69,6 @@ the risk figure and the top drivers, then surfaces it to the doctor and
 caregiver. It fires at most once every 12 hours so a nightly re-run does not
 spam the care team.
 
-## AI Care Coordinator
-
-`app/care/` holds the patient-facing assistant. It is built so the medical
-decisions are made in code and only the wording comes from a language model.
-
-**`scope.py` — what it will answer.** The assistant is not a general chatbot.
-Nine topics are in scope (medication, symptoms, recovery, discharge summary,
-diet, appointments, Recovery Twin, government schemes, health education).
-Anything else gets a fixed refusal. A healthcare signal always beats a blocked
-keyword, so *"can I watch a movie while resting after surgery?"* is answered
-rather than refused.
-
-**`triage.py` — how urgent it is.** Every message is classified 🟢 Low,
-🟡 Moderate or 🔴 High, in code. Two rules make this safe:
-
-- Red flags (chest pain, trouble breathing, seizures, heavy bleeding, stroke
-  signs, high fever…) are **always High** and cannot be talked down. *"I have
-  mild chest pain"* is still an emergency.
-- Softening or intensifying words can lift Low to Moderate, but **never
-  manufacture an emergency**. *"Severe vomiting that will not stop"* stays
-  Moderate — a same-day doctor call, not an ambulance. This keeps alert fatigue
-  down so a real 🔴 still means something.
-
-Negation is handled, so *"I have no chest pain"* does not fire.
-
-**Buttons follow the level**, never the model:
-
-| Level | Buttons |
-| --- | --- |
-| 🟢 Low | Continue Recovery |
-| 🟡 Moderate | Book Doctor Appointment |
-| 🔴 High | Emergency Call Doctor · Call Emergency Services |
-
-**`coordinator.py` — what happens next.** Anything the patient reports is
-written into the Recovery Twin as a symptom, the risk model re-runs, and
-Moderate/High conversations are logged as alerts on the doctor dashboard
-(deduplicated within 30 minutes).
-
-**`llm.py` — the optional wording layer.** Gemini or OpenAI rewrites the draft
-reply to sound warmer. It is given the risk level rather than asked for it, and
-the result is rejected if it is empty, over-long, or softens a High-risk case
-with wording like *"no need to worry"*. Every failure — bad key, no quota, no
-internet — falls back to the rules wording. Set `LLM_PROVIDER=none` to turn it
-off entirely.
-
-The tests run with the model disabled on purpose: everything asserted is the
-path that has to hold offline.
-
 ## Discharge Summary Simplifier
 
 `app/ml/simplifier.py` rewrites prescription shorthand in plain English —
@@ -152,9 +104,8 @@ which is what actually runs today.
 | `GET` | `/api/sentinel/model` | Model version and held-out metrics |
 | `GET` | `/api/doctor/patients` | Roster, highest risk first |
 | `GET` `POST` | `/api/chat` | AI Care Coordinator |
-| `GET` | `/api/chat/meta` | Quick-action chips, whether an LLM is wired up |
 | `POST` | `/api/tools/simplify` | Discharge Summary Simplifier |
-| `GET` | `/api/health` | Liveness, model state, active LLM provider |
+| `GET` | `/api/health` | Liveness and model state |
 
 Roles tied to one patient (`patient`, `caregiver`) are pinned server-side — a
 `patient_id` in the query string is ignored for them. `doctor`, `admin` and
@@ -163,8 +114,8 @@ Roles tied to one patient (`patient`, `caregiver`) are pinned server-side — a
 ## Tests
 
 ```bash
-python -m pytest tests -q          # 109 tests, in-process
-python scripts/smoke_test.py       # 77 checks against running servers
+python -m pytest tests -q          # 53 tests, in-process
+python scripts/smoke_test.py       # 64 checks against running servers
 ```
 
 The smoke test needs both the API and the web app running.
@@ -183,11 +134,7 @@ Copy `.env.example` to `.env` to override any of it.
 | `DATABASE_URL` | `sqlite:///backend/aura.db` |
 | `JWT_SECRET` | `dev-only-change-me` — **change this outside development** |
 | `ACCESS_TOKEN_MINUTES` | `720` |
-| `LLM_PROVIDER` | `auto` — Gemini if its key is set, else OpenAI, else rules only. Force with `gemini`, `openai` or `none` |
-| `GEMINI_API_KEY` | unset |
-| `GEMINI_MODEL` | `gemini-2.0-flash` |
-| `OPENAI_API_KEY` | unset |
-| `OPENAI_MODEL` | `gpt-4o-mini` |
+| `GEMINI_API_KEY` | unset (simplifier uses the rules engine) |
 | `CORS_ORIGINS` | `["*"]` — open, so any deployed frontend can call it |
 
 `CORS_ORIGINS` is `["*"]` to keep deployment easy during the hackathon. Because

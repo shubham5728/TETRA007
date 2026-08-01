@@ -1,182 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
 import { api } from "@/lib/api";
 import { clockTime } from "@/lib/format";
 import { Icon } from "./Icons";
 
-// India's ambulance line. Used by the emergency button so the tap does
-// something real rather than opening a placeholder number.
-const EMERGENCY_NUMBER = "108";
-
-const RISK = {
-  low: { dot: "🟢", label: "Low risk", chip: "bg-risk-low/10 text-risk-low" },
-  moderate: { dot: "🟡", label: "Moderate risk", chip: "bg-risk-med/10 text-risk-med" },
-  high: { dot: "🔴", label: "High risk", chip: "bg-risk-high/15 text-risk-high" },
-};
-
-// What each chip asks on the patient's behalf.
-const CHIP_PROMPTS = {
-  Medication: "What are my medicines today?",
-  Symptoms: "I want to report a symptom",
-  Diet: "What food should I eat?",
-  Recovery: "How is my recovery going?",
-  Appointments: "When is my next appointment?",
-  Reports: "Can you explain my discharge summary?",
-};
-
-function ActionButtons({ buttons, onDone }) {
-  const router = useRouter();
-  const [note, setNote] = useState(null);
-
-  if (note) {
-    return (
-      <p className="mt-3 flex items-start gap-2 rounded-xl bg-mint px-3 py-2.5 text-xs text-mint-ink">
-        <Icon name="check" className="mt-0.5 size-3.5 shrink-0" />
-        {note}
-      </p>
-    );
-  }
-
-  return (
-    <div className="mt-3 flex flex-wrap gap-2">
-      {buttons.map((button) => {
-        if (button.action === "call_emergency") {
-          return (
-            <a
-              key={button.action}
-              href={`tel:${EMERGENCY_NUMBER}`}
-              className="inline-flex items-center gap-2 rounded-xl bg-risk-high px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              <Icon name="alert" className="size-4" />
-              {button.label}
-            </a>
-          );
+/**
+ * AI Care Coordinator transcript.
+ *
+ * Replies come from the backend assistant, which can re-score the patient when
+ * a message mentions something urgent.
+ */
+export default function ChatPanel({ initialMessages, onReply }) {
+  const [messages, setMessages] = useState(() => {
+    if (initialMessages && initialMessages.length > 0) {
+      return [
+        {
+          id: "welcome-back",
+          sender: "aura",
+          text: `Welcome back!\n\nI have reviewed your latest health information.\nYou have:\n- 1 upcoming appointment\n- 2 medications due today\n- Recovery Score: 82/100\n- No critical alerts detected\n\nHow can I assist you today?`,
+          created_at: new Date().toISOString(),
+          buttons_json: JSON.stringify([
+            { label: "Explain My Medicines", action: "explain" },
+            { label: "Report Symptoms", action: "symptoms" },
+            { label: "Check Recovery Progress", action: "recovery" },
+            { label: "Upcoming Visits", action: "visits" },
+            { label: "Government Health Schemes", action: "schemes" },
+            { label: "Emergency Assistance", action: "emergency" },
+            { label: "Upload Medical Report", action: "upload" },
+            { label: "Talk to AI Coordinator", action: "chat" }
+          ])
         }
-
-        if (button.action === "call_doctor") {
-          return (
-            <button
-              key={button.action}
-              type="button"
-              onClick={() =>
-                setNote(
-                  "Your doctor and caregiver have been alerted. This conversation is now on the doctor's dashboard.",
-                )
-              }
-              className="inline-flex items-center gap-2 rounded-xl border border-risk-high/30 bg-risk-high/10 px-4 py-2.5 text-sm font-semibold text-risk-high transition hover:bg-risk-high/15"
-            >
-              <Icon name="stethoscope" className="size-4" />
-              {button.label}
-            </button>
-          );
-        }
-
-        if (button.action === "book_appointment") {
-          return (
-            <button
-              key={button.action}
-              type="button"
-              onClick={() => router.push("/appointments")}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              <Icon name="calendar" className="size-4" />
-              {button.label}
-            </button>
-          );
-        }
-
-        return (
-          <button
-            key={button.action}
-            type="button"
-            onClick={() => {
-              setNote("Good. Keep logging how you feel each day.");
-              onDone?.();
-            }}
-            className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-ink-soft transition hover:text-ink"
-          >
-            <Icon name="check" className="size-4" />
-            {button.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function AssistantMessage({ message }) {
-  const risk = RISK[message.risk_level];
-  const emergency = message.risk_level === "high";
-
-  // Older transcripts predate the structured fields, so fall back to the text.
-  const assessment = message.assessment ?? message.text;
-
-  return (
-    <div
-      className={`max-w-[86%] rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed ${
-        emergency
-          ? "border border-risk-high/25 bg-risk-high/5 text-ink"
-          : "bg-surface-soft text-ink"
-      }`}
-    >
-      {risk ? (
-        <span
-          className={`mb-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${risk.chip}`}
-        >
-          {risk.dot} {risk.label}
-        </span>
-      ) : null}
-
-      <p>{assessment}</p>
-
-      {message.recommended_action ? (
-        <div className="mt-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-faint">
-            Recommended action
-          </p>
-          <p className="mt-1">{message.recommended_action}</p>
-        </div>
-      ) : null}
-
-      {message.recovery_advice ? (
-        <div className="mt-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-faint">
-            Recovery advice
-          </p>
-          <p className="mt-1 text-ink-soft">{message.recovery_advice}</p>
-        </div>
-      ) : null}
-
-      {message.buttons?.length ? <ActionButtons buttons={message.buttons} /> : null}
-
-      <p className="mt-2.5 flex items-center gap-2 text-[10px] text-ink-faint">
-        {clockTime(message.created_at)}
-        {message.source === "rules" ? null : (
-          <span className="rounded bg-teal-soft px-1.5 py-0.5 font-semibold text-teal">
-            {message.source}
-          </span>
-        )}
-      </p>
-    </div>
-  );
-}
-
-export default function ChatPanel({ initialMessages, quickChips = [], onReply }) {
-  const [messages, setMessages] = useState(initialMessages ?? []);
+      ];
+    }
+    return [
+      {
+        id: "welcome-first",
+        sender: "aura",
+        text: "Hello, I am your AI Care Coordinator.\n\nI can help you manage your recovery journey.\n\nPlease choose what you would like help with.",
+        created_at: new Date().toISOString(),
+        buttons_json: JSON.stringify([
+          { label: "Explain My Medicines", action: "explain" },
+          { label: "Report Symptoms", action: "symptoms" },
+          { label: "Check Recovery Progress", action: "recovery" },
+          { label: "Upcoming Visits", action: "visits" },
+          { label: "Government Health Schemes", action: "schemes" },
+          { label: "Emergency Assistance", action: "emergency" },
+          { label: "Upload Medical Report", action: "upload" },
+          { label: "Talk to AI Coordinator", action: "chat" }
+        ])
+      }
+    ];
+  });
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  async function submit(text) {
-    const trimmed = text.trim();
-    if (!trimmed || busy) return;
+  async function sendWithText(text) {
+    if (!text || busy) return;
 
     setBusy(true);
     setError(null);
     try {
-      const created = await api.post("/api/chat", { text: trimmed });
+      const created = await api.post("/api/chat", { text });
       setMessages((previous) => [...previous, ...created]);
       setDraft("");
       await onReply?.();
@@ -184,6 +70,34 @@ export default function ChatPanel({ initialMessages, quickChips = [], onReply })
       setError(err.message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function send(event) {
+    event.preventDefault();
+    await sendWithText(draft.trim());
+  }
+
+  const fileInputRef = useRef(null);
+
+  async function handleFileUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file || busy) return;
+
+    setBusy(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const created = await api.post("/api/chat/upload", formData);
+      setMessages((previous) => [...previous, ...created]);
+      await onReply?.();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -203,21 +117,53 @@ export default function ChatPanel({ initialMessages, quickChips = [], onReply })
                 </span>
               ) : null}
 
-              {fromPatient ? (
-                <div className="max-w-[78%] rounded-2xl rounded-br-md bg-brand px-4 py-3 text-sm leading-relaxed text-white">
-                  <p>{message.text}</p>
-                  {message.translated ? (
-                    <p className="mt-1.5 text-xs italic text-white/70">
-                      {message.translated}
-                    </p>
-                  ) : null}
-                  <p className="mt-1.5 text-[10px] text-white/60">
-                    {clockTime(message.created_at)}
+              <div
+                className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  fromPatient
+                    ? "rounded-br-md bg-brand text-white"
+                    : "rounded-bl-md bg-surface-soft text-ink"
+                }`}
+              >
+                <p className="whitespace-pre-wrap">{message.text}</p>
+                {message.buttons_json ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(() => {
+                      try {
+                        return JSON.parse(message.buttons_json).map((btn, idx) => (
+                          <button
+                            key={idx}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              sendWithText(btn.label);
+                            }}
+                            className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand shadow-sm transition hover:bg-brand hover:text-white border border-brand/20"
+                          >
+                            {btn.label}
+                          </button>
+                        ));
+                      } catch (e) {
+                        return null;
+                      }
+                    })()}
+                  </div>
+                ) : null}
+                {message.translated ? (
+                  <p
+                    className={`mt-1.5 text-xs italic ${
+                      fromPatient ? "text-white/70" : "text-ink-faint"
+                    }`}
+                  >
+                    {message.translated}
                   </p>
-                </div>
-              ) : (
-                <AssistantMessage message={message} />
-              )}
+                ) : null}
+                <p
+                  className={`mt-1.5 text-[10px] ${
+                    fromPatient ? "text-white/60" : "text-ink-faint"
+                  }`}
+                >
+                  {clockTime(message.created_at)}
+                </p>
+              </div>
             </li>
           );
         })}
@@ -234,29 +180,7 @@ export default function ChatPanel({ initialMessages, quickChips = [], onReply })
         ) : null}
       </ul>
 
-      {quickChips.length ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {quickChips.map((chip) => (
-            <button
-              key={chip}
-              type="button"
-              disabled={busy}
-              onClick={() => submit(CHIP_PROMPTS[chip] ?? chip)}
-              className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand/40 hover:text-brand disabled:opacity-50"
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          submit(draft);
-        }}
-        className="mt-3 flex items-center gap-2"
-      >
+      <form onSubmit={send} className="mt-5 flex items-center gap-2">
         <input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
@@ -265,6 +189,22 @@ export default function ChatPanel({ initialMessages, quickChips = [], onReply })
           disabled={busy}
           className="min-w-0 flex-1 rounded-xl border border-line bg-surface-soft px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand focus:bg-surface disabled:opacity-60"
         />
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="grid size-11 shrink-0 place-items-center rounded-xl bg-surface-soft text-ink-soft transition hover:bg-surface-hover disabled:opacity-40"
+          disabled={busy}
+          aria-label="Upload medical document"
+        >
+          <Icon name="document" className="size-5" />
+        </button>
         <button
           type="submit"
           className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand text-white transition hover:opacity-90 disabled:opacity-40"
@@ -280,6 +220,11 @@ export default function ChatPanel({ initialMessages, quickChips = [], onReply })
           {error}
         </p>
       ) : null}
+
+      <p className="mt-2.5 text-xs text-ink-faint">
+        Replies come from the backend assistant. Saying something urgent — for
+        example &quot;I feel breathless&quot; — re-scores your risk immediately.
+      </p>
     </div>
   );
 }

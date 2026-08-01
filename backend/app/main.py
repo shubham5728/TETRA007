@@ -7,7 +7,7 @@ from app.config import settings
 from app.database import Base, engine, SessionLocal
 from app.models import Patient
 from app.ml import sentinel as engine_ml
-from app.routers import auth, coordinator, patient, sentinel, admin
+from app.routers import auth, coordinator, patient, sentinel, gov, doctor, reports, subscriptions
 from app.seed import seed
 
 
@@ -49,8 +49,10 @@ app.include_router(auth.router)
 app.include_router(patient.router)
 app.include_router(sentinel.router)
 app.include_router(coordinator.router)
-app.include_router(admin.router)
-
+app.include_router(gov.router)
+app.include_router(doctor.router)
+app.include_router(reports.router)
+app.include_router(subscriptions.router)
 
 @app.get("/api/health", tags=["meta"])
 def health() -> dict:
@@ -61,14 +63,9 @@ def health() -> dict:
     except engine_ml.ModelNotTrained:
         model_state = "not trained — run: python -m app.ml.train"
 
-    from app.care import llm
-
     return {
         "status": "ok",
         "service": settings.app_name,
         "version": settings.api_version,
         "model": model_state,
-        # Which language model will phrase Care Coordinator replies, if any.
-        # null means the deterministic rules engine answers on its own.
-        "llm_provider": llm.active_provider(),
     }
