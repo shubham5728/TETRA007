@@ -45,6 +45,7 @@ class PatientOut(ORMModel):
     hospital: str
     village: str
     care_team: str
+    chat_credits: int
 
 
 class VitalOut(ORMModel):
@@ -61,12 +62,6 @@ class VitalCreate(BaseModel):
     value: str
     unit: str
     status: str = "normal"
-
-
-class MedicationCreate(BaseModel):
-    name: str
-    dose: str
-    schedule: str
 
 
 class MedicationOut(ORMModel):
@@ -97,16 +92,43 @@ class SymptomCreate(BaseModel):
     trend: str = "flat"
 
 
+class DoctorProfileOut(ORMModel):
+    id: int
+    name: str
+    specialization: str
+    hospital: str
+    experience_years: int
+    rating: float
+    fee: int
+    languages: str
+
 class AppointmentOut(ORMModel):
     id: int
     title: str
     doctor: str
+    doctor_id: int | None
     mode: str
     scheduled_for: date
     time_label: str
     status: str
     attended: bool | None
+    reason_for_visit: str | None
+    shared_recovery_twin: bool
+    ai_health_summary: str | None
+    doctor_profile: DoctorProfileOut | None = None
 
+class AppointmentBookRequest(BaseModel):
+    doctor_id: int
+    mode: str
+    scheduled_for: date
+    time_label: str
+    reason_for_visit: str
+    shared_recovery_twin: bool
+
+class AppointmentStatusUpdate(BaseModel):
+    status: str = Field(pattern="^(Approved|Rejected|Rescheduled)$")
+    new_date: date | None = None
+    new_time: str | None = None
 
 class AlertOut(ORMModel):
     id: int
@@ -174,38 +196,18 @@ class RecoveryTwinOut(BaseModel):
 # --------------------------------------------------------------------------- chat
 
 
-class ChatButton(BaseModel):
-    label: str
-    action: str
-
-
 class ChatMessageOut(ORMModel):
     id: int
     sender: str
     text: str
     translated: str | None
     created_at: datetime
-
-    # Present on assistant messages only.
-    assessment: str | None = None
-    recommended_action: str | None = None
-    recovery_advice: str | None = None
-    risk_level: str | None = None
-    topic: str | None = None
-    buttons: list[ChatButton] = Field(default_factory=list)
-    source: str | None = None
+    buttons_json: str | None = None
 
 
 class ChatSend(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
-
-
-class ChatMeta(BaseModel):
-    """Everything the chat screen needs besides the transcript."""
-
-    quick_chips: list[str]
-    assistant_online: bool
-    llm_enabled: bool
+    language: str = Field(default="en", description="ISO language code: en, hi, gu")
 
 
 # --------------------------------------------------------------------------- tools
@@ -230,3 +232,25 @@ class DoctorPatientOut(BaseModel):
     risk: int
     level: str
     last_check_in: str
+
+
+# --------------------------------------------------------------------------- health identity
+
+
+class VerificationLogOut(ORMModel):
+    id: int
+    status: str
+    fraud_risk_score: int | None
+    notes: str | None
+    verified_by_role: str | None
+    created_at: datetime
+
+
+class DigitalHealthCardOut(ORMModel):
+    id: int
+    card_type: str
+    card_number: str
+    verification_status: str
+    uploaded_at: datetime
+    image_url: str | None
+    verification_logs: list[VerificationLogOut]

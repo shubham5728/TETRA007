@@ -217,12 +217,11 @@ def _simplify_with_gemini(text: str) -> list[str] | None:
             "line. Do not add advice that is not in the text.\n\n" + text
         )
         response = httpx.post(
-            f"{settings.gemini_base_url}/models/"
-            f"{settings.gemini_model}:generateContent",
-            # Header auth keeps the secret out of access logs.
-            headers={"x-goog-api-key": settings.gemini_api_key},
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            "gemini-2.0-flash:generateContent",
+            params={"key": settings.gemini_api_key},
             json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=settings.llm_timeout_seconds,
+            timeout=20.0,
         )
         response.raise_for_status()
         body = response.json()

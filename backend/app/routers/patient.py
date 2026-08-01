@@ -14,13 +14,13 @@ from app.models import (
     Symptom,
     VitalReading,
     WearableDevice,
+    DoctorProfile,
 )
 from app.schemas import (
     AlertOut,
     AppointmentOut,
     MedicationOut,
     MedicationTake,
-    MedicationCreate,
     PatientOut,
     SchemeOut,
     SymptomCreate,
@@ -28,6 +28,8 @@ from app.schemas import (
     VitalCreate,
     VitalOut,
     WearableOut,
+    DoctorProfileOut,
+    AppointmentBookRequest,
 )
 from app.security import get_current_user, resolve_patient_id
 from app.models import User
@@ -48,47 +50,6 @@ def current_patient(
             status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
         )
     return patient
-
-
-def writable_patient(*allowed_roles: str):
-    """
-    Dependency for endpoints that change a patient's clinical record.
-
-    Reading and writing need different rules. Doctors, hospital admins and
-    government users may *read* any patient by passing `patient_id`, but that
-    must not also let them write. Vitals and symptoms feed the Sentinel model,
-    so an unrestricted write is a way to move someone's clinical risk score.
-    Each write endpoint therefore names the roles allowed to use it.
-    """
-
-    def dependency(
-        patient_id: int | None = None,
-        user: User = Depends(get_current_user),
-        db: Session = Depends(get_db),
-    ) -> Patient:
-        if user.role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    f"{user.role} accounts cannot change a patient's record. "
-                    f"Allowed: {', '.join(sorted(allowed_roles))}"
-                ),
-            )
-        resolved = resolve_patient_id(user, patient_id)
-        patient = db.get(Patient, resolved)
-        if patient is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"
-            )
-        return patient
-
-    return dependency
-
-
-# Who may write what. Kept together so the policy is readable in one place.
-LOGS_OWN_CARE = ("patient", "caregiver")
-CLINICAL_TEAM = ("patient", "caregiver", "doctor")
-CAN_RESCORE = ("patient", "caregiver", "doctor", "admin")
 
 
 @router.get("", response_model=PatientOut)
@@ -112,7 +73,7 @@ def vitals(
 @router.post("/vitals", response_model=VitalOut, status_code=status.HTTP_201_CREATED)
 def add_vital(
     payload: VitalCreate,
-    patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
+    patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
 ) -> VitalReading:
     reading = VitalReading(patient_id=patient.id, **payload.model_dump())
@@ -135,40 +96,9 @@ def medications(
     )
 
 
-@router.post("/medications", response_model=MedicationOut, status_code=201)
-def prescribe_medication(
-    payload: MedicationCreate,
-    db: Session = Depends(get_db),
-    # Only doctors (or authorized roles) can prescribe
-    patient: Patient = Depends(writable_patient("doctor", "admin")),
-) -> Medication:
-    """Prescribe a new medication for the patient."""
-    from app.services import simplifier
-    
-    # Generate simplified plain text instructions
-    raw_instruction = f"{payload.name} {payload.dose} {payload.schedule}"
-    simplified = simplifier.simplify_prescription(raw_instruction)
-    
-    med = Medication(
-        patient_id=patient.id,
-        name=payload.name,
-        dose=payload.dose,
-        schedule=payload.schedule,
-        plain=simplified,
-        adherence=100,  # Starts perfectly
-        taken_today=False,
-    )
-    db.add(med)
-    db.commit()
-    db.refresh(med)
-    return med
-
-
 @router.post("/medications/{medication_id}/take", response_model=MedicationOut)
 def mark_medication(
     medication_id: int,
-    # Marking a dose taken is the patient's own action, so the clinical team
-    # is deliberately not included here.
     payload: MedicationTake,
     patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
@@ -205,7 +135,7 @@ def symptoms(
 @router.post("/symptoms", response_model=SymptomOut, status_code=status.HTTP_201_CREATED)
 def log_symptom(
     payload: SymptomCreate,
-    patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
+    patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
 ) -> Symptom:
     symptom = Symptom(
@@ -279,26 +209,77 @@ def wearables(
 
 @router.get("/schemes", response_model=list[SchemeOut])
 def schemes(
-    _: User = Depends(get_current_user), db: Session = Depends(get_db)
+    _: Patient = Depends(current_patient), db: Session = Depends(get_db)
 ) -> list[Scheme]:
     return list(db.scalars(select(Scheme).order_by(Scheme.id)))
 
 
-@router.post("/sos", response_model=AlertOut, status_code=status.HTTP_201_CREATED)
-def trigger_sos(
-    patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
-    db: Session = Depends(get_db),
-) -> Alert:
-    """Trigger an emergency SOS alert."""
-    alert = Alert(
+@router.get("/doctors", response_model=list[DoctorProfileOut])
+def get_doctors(
+    _: Patient = Depends(current_patient), db: Session = Depends(get_db)
+) -> list[DoctorProfile]:
+    return list(db.scalars(select(DoctorProfile).order_by(DoctorProfile.id)))
+
+
+@router.get("/doctors/recommend", response_model=DoctorProfileOut)
+def recommend_doctor(
+    patient: Patient = Depends(current_patient), db: Session = Depends(get_db)
+) -> DoctorProfile:
+    # A mocked recommendation based on patient diagnosis/symptoms
+    # E.g. if diagnosis has "Heart" -> Cardiologist
+    diag_lower = patient.diagnosis.lower()
+    spec = "General Physician"
+    if "heart" in diag_lower or "hypertension" in diag_lower or "cabg" in diag_lower:
+        spec = "Cardiologist"
+    elif "diabetes" in diag_lower or "sugar" in diag_lower:
+        spec = "Endocrinologist"
+    elif "brain" in diag_lower or "stroke" in diag_lower:
+        spec = "Neurologist"
+    elif "bone" in diag_lower or "fracture" in diag_lower:
+        spec = "Orthopedic Surgeon"
+    
+    doc = db.scalar(select(DoctorProfile).where(DoctorProfile.specialization == spec).limit(1))
+    if not doc:
+        doc = db.scalar(select(DoctorProfile).limit(1)) # fallback
+    if not doc:
+        raise HTTPException(status_code=404, detail="No doctors found")
+    return doc
+
+
+@router.post("/appointments/book", response_model=AppointmentOut)
+def book_appointment(
+    req: AppointmentBookRequest,
+    patient: Patient = Depends(current_patient), 
+    db: Session = Depends(get_db)
+) -> Appointment:
+    doc = db.scalar(select(DoctorProfile).where(DoctorProfile.id == req.doctor_id))
+    if not doc:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    
+    ai_summary = None
+    if req.shared_recovery_twin:
+        # Mock AI summary generation
+        ai_summary = (
+            f"Patient Overview:\n"
+            f"{patient.name}, {patient.age}yo, diagnosed with {patient.diagnosis}.\n"
+            f"Recently discharged from {patient.hospital}.\n"
+            f"AI Health Summary: Moderate risk. Symptoms being managed but requires {doc.specialization} review."
+        )
+
+    appt = Appointment(
         patient_id=patient.id,
-        title="🚨 Emergency SOS Triggered",
-        detail=f"Emergency SOS triggered for {patient.name}. Immediate assistance required.",
-        severity="critical",
-        acknowledged=False,
-        created_at=datetime.now(timezone.utc),
+        doctor_id=doc.id,
+        title=f"{doc.specialization} Consultation",
+        doctor=doc.name,
+        mode=req.mode,
+        scheduled_for=req.scheduled_for,
+        time_label=req.time_label,
+        status="Pending",
+        reason_for_visit=req.reason_for_visit,
+        shared_recovery_twin=req.shared_recovery_twin,
+        ai_health_summary=ai_summary
     )
-    db.add(alert)
+    db.add(appt)
     db.commit()
-    db.refresh(alert)
-    return alert
+    db.refresh(appt)
+    return appt

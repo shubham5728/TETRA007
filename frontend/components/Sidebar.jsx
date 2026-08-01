@@ -10,28 +10,42 @@ export default function Sidebar({ onNavigate }) {
   const pathname = usePathname();
   const { user } = useSession();
 
-  // If session is not ready yet, we can either render nothing or full list.
-  // We'll render filtered items if user exists, else empty.
-  const filteredNavItems = user
-    ? navItems.filter((item) => item.roles.includes(user.role))
-    : [];
-
-  // Where the brand logo redirects
-  const getWorkspace = (role) => {
-    switch (role) {
-      case "patient": return "/dashboard";
-      case "doctor": return "/doctor-portal";
-      case "caregiver": return "/caregiver-portal";
-      case "admin": return "/sentinel";
-      case "gov": return "/settings";
-      default: return "/dashboard";
+  const filteredItems = navItems.filter((item) => {
+    // Portals restricted to specific roles
+    const portals = {
+      "/doctor-portal": "doctor",
+      "/caregiver-portal": "caregiver",
+      "/gov-portal": "gov",
+    };
+    
+    // If the item is a restricted portal, only show it to the matching role
+    if (portals[item.href]) {
+      if (user?.role !== portals[item.href]) {
+        return false;
+      }
     }
-  };
+    
+    // Government users should ONLY see the Government Portal and Settings
+    if (user?.role === "gov") {
+      if (item.href !== "/gov-portal" && item.href !== "/settings") {
+        return false;
+      }
+    }
+    
+    // Doctor users should ONLY see the Doctor Portal and Settings
+    if (user?.role === "doctor") {
+      if (item.href !== "/doctor-portal" && item.href !== "/settings") {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
   return (
     <div className="flex h-full flex-col gap-6 bg-surface px-5 py-6">
       <Link
-        href={getWorkspace(user?.role)}
+        href="/dashboard"
         onClick={onNavigate}
         className="flex items-center gap-3 rounded-xl px-1 py-1 transition hover:opacity-90"
       >
@@ -48,7 +62,7 @@ export default function Sidebar({ onNavigate }) {
 
         <nav aria-label="Main">
           <ul className="space-y-1">
-            {filteredNavItems.map((item) => {
+            {filteredItems.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
                 <li key={item.href}>

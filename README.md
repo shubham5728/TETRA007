@@ -16,6 +16,8 @@ _Predictive Readmission & Early Relapse Intelligence_
 
 **Team FusionX | Team Code: TETRA007**
 
+**🚀 Live Demo:** [https://tetra-007.vercel.app/](https://tetra-007.vercel.app/)
+
 _No patient should be forgotten after leaving the hospital._
 
 <br />

@@ -22,7 +22,10 @@ class Patient(Base):
     discharged_on: Mapped[date] = mapped_column(Date)
     hospital: Mapped[str] = mapped_column(String(200))
     village: Mapped[str] = mapped_column(String(200))
+    district: Mapped[str | None] = mapped_column(String(120))
+    state: Mapped[str | None] = mapped_column(String(120))
     care_team: Mapped[str] = mapped_column(String(120))
+    chat_credits: Mapped[int] = mapped_column(Integer, default=10)
 
     users: Mapped[list["User"]] = relationship(back_populates="patient")
     vitals: Mapped[list["VitalReading"]] = relationship(
@@ -52,6 +55,9 @@ class Patient(Base):
     score_history: Mapped[list["RecoveryScorePoint"]] = relationship(
         back_populates="patient", cascade="all, delete-orphan"
     )
+    health_cards: Mapped[list["DigitalHealthCard"]] = relationship(
+        back_populates="patient", cascade="all, delete-orphan"
+    )
 
 
 class User(Base):
@@ -61,7 +67,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(200), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(120))
     password_hash: Mapped[str] = mapped_column(String(255))
-    # patient | doctor | caregiver | admin | gov
+    # patient | doctor | hospital_admin | caregiver | rural_health_worker | gov_authority | insurance
     role: Mapped[str] = mapped_column(String(20), index=True)
     # The patient this account is attached to. Doctors and admins see every
     # patient, so this stays null for them.
@@ -113,11 +119,25 @@ class Symptom(Base):
     patient: Mapped["Patient"] = relationship(back_populates="symptoms")
 
 
+class DoctorProfile(Base):
+    __tablename__ = "doctor_profiles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(160))
+    specialization: Mapped[str] = mapped_column(String(160))
+    hospital: Mapped[str] = mapped_column(String(200))
+    experience_years: Mapped[int] = mapped_column(Integer)
+    rating: Mapped[float] = mapped_column(Float)
+    fee: Mapped[int] = mapped_column(Integer)
+    languages: Mapped[str] = mapped_column(String(200))
+
+
 class Appointment(Base):
     __tablename__ = "appointments"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    doctor_id: Mapped[int | None] = mapped_column(ForeignKey("doctor_profiles.id"), index=True, nullable=True)
     title: Mapped[str] = mapped_column(String(160))
     doctor: Mapped[str] = mapped_column(String(160))
     mode: Mapped[str] = mapped_column(String(40))
@@ -125,8 +145,29 @@ class Appointment(Base):
     time_label: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(20), default="Confirmed")
     attended: Mapped[bool | None] = mapped_column(Boolean, default=None)
+    reason_for_visit: Mapped[str | None] = mapped_column(Text)
+    shared_recovery_twin: Mapped[bool] = mapped_column(Boolean, default=False)
+    ai_health_summary: Mapped[str | None] = mapped_column(Text)
 
     patient: Mapped["Patient"] = relationship(back_populates="appointments")
+    doctor_profile: Mapped["DoctorProfile"] = relationship()
+
+
+class MedicalReport(Base):
+    __tablename__ = "medical_reports"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    filename: Mapped[str] = mapped_column(String(200))
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    ocr_text: Mapped[str] = mapped_column(Text)
+    smart_summary: Mapped[str] = mapped_column(Text)
+    simple_explanation: Mapped[str] = mapped_column(Text)
+    risk_level: Mapped[str] = mapped_column(String(20), default="Unknown")
+    recommended_specialist: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    language: Mapped[str] = mapped_column(String(10), default="en")
+
+    patient: Mapped["Patient"] = relationship()
 
 
 class Alert(Base):
@@ -215,3 +256,50 @@ class Scheme(Base):
     name: Mapped[str] = mapped_column(String(200))
     benefit: Mapped[str] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(30))
+
+
+class DigitalHealthCard(Base):
+    __tablename__ = "digital_health_cards"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    card_type: Mapped[str] = mapped_column(String(100))  # ABHA | Ayushman Bharat | PM-JAY | Hospital | Insurance
+    card_number: Mapped[str] = mapped_column(String(100))
+    verification_status: Mapped[str] = mapped_column(String(50), default="Pending") # Pending | Verified | Rejected
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    image_url: Mapped[str | None] = mapped_column(String(500))
+
+    patient: Mapped["Patient"] = relationship(back_populates="health_cards")
+    verification_logs: Mapped[list["VerificationLog"]] = relationship(
+        back_populates="card", cascade="all, delete-orphan"
+    )
+
+
+class VerificationLog(Base):
+    __tablename__ = "verification_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    card_id: Mapped[int] = mapped_column(ForeignKey("digital_health_cards.id"), index=True)
+    status: Mapped[str] = mapped_column(String(50))
+    fraud_risk_score: Mapped[int | None] = mapped_column(Integer)
+    notes: Mapped[str | None] = mapped_column(Text)
+    verified_by_role: Mapped[str | None] = mapped_column(String(50))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    card: Mapped["DigitalHealthCard"] = relationship(back_populates="verification_logs")
+
+
+class SubscriptionRequest(Base):
+    __tablename__ = "subscription_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    plan_name: Mapped[str] = mapped_column(String(100), default="AURA Basic Plan")
+    amount: Mapped[int] = mapped_column(Integer, default=49)
+    credits_purchased: Mapped[int] = mapped_column(Integer, default=25)
+    utr_number: Mapped[str] = mapped_column(String(100))
+    transaction_id: Mapped[str] = mapped_column(String(100))
+    status: Mapped[str] = mapped_column(String(50), default="Pending") # Pending | Approved | Rejected
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    patient: Mapped["Patient"] = relationship()

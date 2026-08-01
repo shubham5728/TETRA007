@@ -1,16 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ErrorState, Loading } from "@/components/DataStates";
 import { Icon } from "@/components/Icons";
 import { Card, CardTitle, ProgressBar, RiskPill, StatTile } from "@/components/ui";
 import { setViewingPatientId } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
+import DoctorAppointmentsView from "@/components/DoctorAppointmentsView";
 
 const RISK_TONE = { High: "high", Moderate: "med", Low: "low" };
 
 export default function DoctorPortalView() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState("overview");
   const patients = useApi("/api/doctor/patients");
 
   if (patients.loading) return <Loading rows={3} />;
@@ -31,7 +34,27 @@ export default function DoctorPortalView() {
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-line pb-4">
+        <button 
+          onClick={() => setActiveTab("overview")}
+          className={`px-4 py-2 font-semibold rounded-full ${activeTab === "overview" ? "bg-ink text-white" : "bg-surface-soft text-ink-soft hover:bg-line/50"}`}
+        >
+          Patient Overview
+        </button>
+        <button 
+          onClick={() => setActiveTab("appointments")}
+          className={`px-4 py-2 font-semibold rounded-full ${activeTab === "appointments" ? "bg-ink text-white" : "bg-surface-soft text-ink-soft hover:bg-line/50"}`}
+        >
+          Appointment Management
+        </button>
+      </div>
+
+      {activeTab === "appointments" ? (
+        <DoctorAppointmentsView />
+      ) : (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Patients monitored" value={rows.length} icon="users" />
         <StatTile label="High risk today" value={highRisk} icon="alert" />
         <StatTile label="Moderate risk" value={moderate} icon="activity" />
@@ -188,6 +211,8 @@ export default function DoctorPortalView() {
           </ul>
         </Card>
       </div>
+        </>
+      )}
     </div>
   );
 }
