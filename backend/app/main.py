@@ -60,9 +60,14 @@ def health() -> dict:
     except engine_ml.ModelNotTrained:
         model_state = "not trained — run: python -m app.ml.train"
 
+    from app.care import llm
+
     return {
         "status": "ok",
         "service": settings.app_name,
         "version": settings.api_version,
         "model": model_state,
+        # Which language model will phrase Care Coordinator replies, if any.
+        # null means the deterministic rules engine answers on its own.
+        "llm_provider": llm.active_provider(),
     }

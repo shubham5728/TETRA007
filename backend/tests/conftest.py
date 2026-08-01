@@ -13,6 +13,14 @@ if TEST_DB.exists():
     TEST_DB.unlink()
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB}"
 
+# Tests must never call a language model: it would be slow, cost money, and
+# make the suite depend on someone else's uptime. Everything asserted here is
+# the deterministic path, which is exactly what has to hold when the model is
+# unavailable — an expired key, no quota, or no internet at all.
+os.environ["LLM_PROVIDER"] = "none"
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["GEMINI_API_KEY"] = ""
+
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 

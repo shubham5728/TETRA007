@@ -1,122 +1,117 @@
+import json
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.care import coordinator, llm
+from app.care.replies import QUICK_CHIPS
 from app.database import get_db
 from app.ml.simplifier import simplify
-from app.models import ChatMessage, Medication, Patient
+from app.models import ChatMessage, Patient
 from app.routers.patient import current_patient
 from app.schemas import (
     ChatMessageOut,
+    ChatMeta,
     ChatSend,
     SimplifyRequest,
     SimplifyResponse,
 )
-from app.services import run_assessment
 
 router = APIRouter(prefix="/api", tags=["coordinator"])
 
-# Words that mean the assistant should re-score the patient straight away
-# instead of waiting for the nightly run.
-URGENT_WORDS = (
-    "breathless", "breathing", "chest pain", "faint", "fainted", "bleeding",
-    "swollen", "swelling", "fever", "dizzy", "vomit", "unconscious",
-)
+
+def _serialise(message: ChatMessage) -> dict:
+    """Widen the ORM row into the shape the chat UI renders."""
+    data = {
+        "id": message.id,
+        "sender": message.sender,
+        "text": message.text,
+        "translated": message.translated,
+        "created_at": message.created_at,
+        "assessment": message.assessment,
+        "recommended_action": message.recommended_action,
+        "recovery_advice": message.recovery_advice,
+        "risk_level": message.risk_level,
+        "topic": message.topic,
+        "source": message.source,
+        "buttons": [],
+    }
+    if message.buttons_json:
+        try:
+            data["buttons"] = json.loads(message.buttons_json)
+        except json.JSONDecodeError:
+            data["buttons"] = []
+    return data
 
 
-def _reply_for(db: Session, patient: Patient, text: str) -> str:
-    """
-    Rule-based assistant.
-
-    This is deliberately simple and says what it knows. Wiring Gemini in means
-    replacing this one function.
-    """
-    lowered = text.lower()
-
-    if any(word in lowered for word in URGENT_WORDS):
-        assessment = run_assessment(db, patient)
-        if assessment.risk_level == "High":
-            return (
-                "Thank you for telling me. This has been added to your Recovery "
-                f"Twin and your risk is now {assessment.readmission_risk}%. "
-                "I have alerted your doctor and caregiver. Please rest and keep "
-                "your phone nearby."
-            )
-        return (
-            "Thank you for telling me. I have saved this to your Recovery Twin "
-            f"and re-checked your risk — it is {assessment.readmission_risk}%, "
-            f"which is {assessment.risk_level.lower()}. If it gets worse, tell me "
-            "again and I will alert your doctor."
-        )
-
-    if any(word in lowered for word in ("medicine", "tablet", "dose", "medication")):
-        medications = db.scalars(
-            select(Medication).where(Medication.patient_id == patient.id)
-        ).all()
-        if medications:
-            lines = [f"{m.name} ({m.dose}) — {m.plain}" for m in medications[:4]]
-            return "Here is your medicine plan today. " + " ".join(lines)
-        return "I do not have any medicines saved for you yet."
-
-    if any(word in lowered for word in ("appointment", "visit", "follow")):
-        return (
-            "I can see your follow-up plan in the Appointments section. You will "
-            "get a reminder two days before and again on the morning of the visit."
-        )
-
-    if any(word in lowered for word in ("risk", "score", "recovery")):
-        return (
-            "Your Recovery Twin is updated every day from your check-ins. You can "
-            "see the current score and what is driving it on the Recovery Twin page."
-        )
-
-    return (
-        "Thank you for telling me. I have saved this to your Recovery Twin. If "
-        "anything gets worse, tell me straight away and I will alert your doctor."
-    )
+@router.get("/chat/meta", response_model=ChatMeta)
+def chat_meta() -> dict:
+    """Quick-action chips and whether the language model is wired up."""
+    return {
+        "quick_chips": list(QUICK_CHIPS),
+        "assistant_online": True,
+        "llm_enabled": llm.is_enabled(),
+    }
 
 
 @router.get("/chat", response_model=list[ChatMessageOut])
 def chat_history(
     patient: Patient = Depends(current_patient), db: Session = Depends(get_db)
-) -> list[ChatMessage]:
-    return list(
-        db.scalars(
-            select(ChatMessage)
-            .where(ChatMessage.patient_id == patient.id)
-            .order_by(ChatMessage.id)
-        )
+) -> list[dict]:
+    rows = db.scalars(
+        select(ChatMessage)
+        .where(ChatMessage.patient_id == patient.id)
+        .order_by(ChatMessage.id)
     )
+    return [_serialise(row) for row in rows]
 
 
-@router.post("/chat", response_model=list[ChatMessageOut], status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/chat", response_model=list[ChatMessageOut], status_code=status.HTTP_201_CREATED
+)
 def send_message(
     payload: ChatSend,
     patient: Patient = Depends(current_patient),
     db: Session = Depends(get_db),
-) -> list[ChatMessage]:
-    """Store the patient's message and the assistant's reply, returning both."""
+) -> list[dict]:
+    """
+    Store the patient's message and the assistant's reply, returning both.
+
+    The reply is triaged by rules first; anything the patient reports is written
+    into the Recovery Twin and Moderate/High cases raise an alert for the doctor.
+    """
     now = datetime.now(timezone.utc)
+    text = payload.text.strip()
 
     question = ChatMessage(
-        patient_id=patient.id, sender="patient", text=payload.text.strip(), created_at=now
+        patient_id=patient.id, sender="patient", text=text, created_at=now
     )
     db.add(question)
     db.flush()
 
+    reply = coordinator.respond(db, patient, text)
+
     answer = ChatMessage(
         patient_id=patient.id,
         sender="aura",
-        text=_reply_for(db, patient, payload.text),
+        text=reply.as_text(),
         created_at=now,
+        assessment=reply.assessment,
+        recommended_action=reply.recommended_action,
+        recovery_advice=reply.recovery_advice,
+        risk_level=reply.risk_level,
+        topic=reply.topic,
+        buttons_json=json.dumps(reply.buttons) if reply.buttons else None,
+        source=reply.source,
     )
     db.add(answer)
     db.commit()
     db.refresh(question)
     db.refresh(answer)
-    return [question, answer]
+
+    return [_serialise(question), _serialise(answer)]
 
 
 @router.post("/tools/simplify", response_model=SimplifyResponse)

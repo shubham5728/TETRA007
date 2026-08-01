@@ -168,6 +168,11 @@ class RecoveryTwinOut(BaseModel):
 # --------------------------------------------------------------------------- chat
 
 
+class ChatButton(BaseModel):
+    label: str
+    action: str
+
+
 class ChatMessageOut(ORMModel):
     id: int
     sender: str
@@ -175,9 +180,26 @@ class ChatMessageOut(ORMModel):
     translated: str | None
     created_at: datetime
 
+    # Present on assistant messages only.
+    assessment: str | None = None
+    recommended_action: str | None = None
+    recovery_advice: str | None = None
+    risk_level: str | None = None
+    topic: str | None = None
+    buttons: list[ChatButton] = Field(default_factory=list)
+    source: str | None = None
+
 
 class ChatSend(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
+
+
+class ChatMeta(BaseModel):
+    """Everything the chat screen needs besides the transcript."""
+
+    quick_chips: list[str]
+    assistant_online: bool
+    llm_enabled: bool
 
 
 # --------------------------------------------------------------------------- tools

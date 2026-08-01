@@ -3,8 +3,11 @@
 // The token lives in localStorage because every workspace screen fetches on the
 // client. Moving to httpOnly cookies later only changes this file.
 
+// Local backend by default. To point at a deployed API, set
+// NEXT_PUBLIC_API_URL in .env.local (or in the host's environment settings) —
+// no code change needed.
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://tetra007.onrender.com";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export const TOKEN_KEY = "aura.token";
 export const USER_KEY = "aura.user";

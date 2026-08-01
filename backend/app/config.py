@@ -26,18 +26,25 @@ class Settings(BaseSettings):
     # Where the trained Sentinel model is written.
     model_path: str = str(BASE_DIR / "app" / "ml" / "sentinel_model.joblib")
 
-    # Optional Gemini key. Without it the simplifier falls back to its
-    # rule-based path, which is what runs today.
-    gemini_api_key: str | None = None
+    # ---------------------------------------------------------------- language model
+    #
+    # A language model only rewrites the wording of a Care Coordinator reply.
+    # It never decides the risk level or which buttons appear — that stays with
+    # the triage rules in app/care/triage.py, so an outage, an expired key or a
+    # bad completion can never downgrade a medical emergency.
+    #
+    # "auto" uses Gemini when a Gemini key is present, otherwise OpenAI,
+    # otherwise nothing.
+    llm_provider: str = "auto"  # auto | gemini | openai | none
+    llm_timeout_seconds: float = 15.0
 
-    # OpenAI powers the wording of Care Coordinator replies. It never decides
-    # risk level or which buttons appear — that stays with the triage rules in
-    # app/care/triage.py, so an outage or a bad completion cannot downgrade a
-    # medical emergency.
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.0-flash"
+    gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta"
+
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
     openai_base_url: str = "https://api.openai.com/v1"
-    openai_timeout_seconds: float = 15.0
 
     cors_origins: list[str] = ["*"]
 
