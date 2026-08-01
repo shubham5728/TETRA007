@@ -33,11 +33,9 @@ const ABILITIES = [
   },
 ];
 
-const SAMPLE = "Tab Metformin 500mg BID\nTab Atorvastatin 10mg HS\nReview BP at f/u";
-
 /** Live Discharge Summary Simplifier, calling the backend rules engine. */
 function Simplifier() {
-  const [text, setText] = useState(SAMPLE);
+  const [text, setText] = useState("");
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
