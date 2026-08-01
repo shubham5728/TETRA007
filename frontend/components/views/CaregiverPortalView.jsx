@@ -147,7 +147,7 @@ export default function CaregiverPortalView() {
                       type="button"
                       onClick={() => acknowledge(alert)}
                       disabled={ackId === alert.id}
-                      className="shrink-0 self-start rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink disabled:opacity-50"
+                      className="shrink-0 self-start rounded-lg border border-line bg-surface px-3.5 py-2 text-xs font-semibold text-ink-soft transition hover:text-ink disabled:opacity-50 touch-target min-h-[38px]"
                     >
                       {ackId === alert.id ? "…" : "Mark seen"}
                     </button>
@@ -161,7 +161,7 @@ export default function CaregiverPortalView() {
 
           <button
             type="button"
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-risk-high px-4 py-3.5 font-display text-sm font-semibold text-white transition hover:opacity-90"
+            className="mt-5 flex w-full min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-risk-high px-4 py-3.5 font-display text-sm font-semibold text-white transition hover:opacity-90 shadow-md active:scale-[0.99]"
           >
             <Icon name="alert" className="size-4.5" />
             Emergency SOS — call care team

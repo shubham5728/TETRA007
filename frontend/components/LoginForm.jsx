@@ -56,7 +56,7 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-[460px]">
-      <h1 className="font-display text-3xl font-bold tracking-tight text-ink">
+      <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">
         Secure role-based login
       </h1>
       <p className="mt-2.5 text-sm leading-relaxed text-ink-soft">
@@ -64,10 +64,10 @@ export default function LoginForm() {
         evaluated immediately.
       </p>
 
-      <form onSubmit={submit} className="mt-7">
+      <form onSubmit={submit} className="mt-6 sm:mt-7">
         <fieldset disabled={busy}>
           <legend className="sr-only">Choose a workspace role</legend>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
             {roles.map((role) => {
               const active = role.id === roleId;
               return (
@@ -76,7 +76,7 @@ export default function LoginForm() {
                   type="button"
                   onClick={() => pickRole(role)}
                   aria-pressed={active}
-                  className={`flex items-center gap-2.5 rounded-xl border px-4 py-3.5 text-left text-sm font-semibold transition ${
+                  className={`flex items-center gap-2 sm:gap-2.5 rounded-xl border px-3 sm:px-4 py-3 sm:py-3.5 text-left text-xs sm:text-sm font-semibold transition ${
                     role.wide ? "col-span-2" : ""
                   } ${
                     active

@@ -13,7 +13,7 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       {/* ---------------- Left: brand panel ---------------- */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-navy-deep via-navy to-[#0b3d8f] px-7 py-12 text-white sm:px-12 lg:py-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-navy-deep via-navy to-[#0b3d8f] px-6 py-10 text-white sm:px-12 lg:py-16">
         {/* Concentric rings bleeding off the bottom-right corner */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <div className="absolute -bottom-52 -right-40 size-[560px] rounded-full border border-white/10" />
@@ -23,14 +23,14 @@ export default function LoginPage() {
         </div>
 
         <div className="relative flex h-full flex-col">
-          <BrandMark className="size-14 rounded-2xl" />
+          <BrandMark className="size-12 sm:size-14 rounded-2xl" />
 
-          <div className="mt-10 lg:mt-14">
+          <div className="mt-8 sm:mt-10 lg:mt-14">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal">
               Secure AURA Care Network
             </p>
 
-            <h2 className="mt-5 max-w-md font-display text-[2.75rem] font-bold leading-[0.98] tracking-tight sm:text-6xl">
+            <h2 className="mt-4 sm:mt-5 max-w-md font-display text-3xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
               Trusted recovery intelligence starts here.
             </h2>
 

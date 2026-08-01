@@ -372,17 +372,11 @@ export default function DoctorPortalView() {
     <div className="space-y-6">
       {/* Toast Banner */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-medium text-white shadow-2xl transition">
-          <span className="grid size-6 place-items-center rounded-full bg-emerald-500 text-xs text-white">✓</span>
-          {toastMessage}
+        <div className="fixed bottom-5 right-5 z-50 flex max-w-[calc(100vw-2.5rem)] items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-medium text-white shadow-2xl transition safe-bottom">
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs text-white">✓</span>
+          <span className="truncate">{toastMessage}</span>
         </div>
       )}
-
-
-
-
-
-
 
       {/* DYNAMIC MODULAR WORKSPACE CONTENT BASED ON SIDEBAR SELECTION */}
       <main className="space-y-6">
@@ -503,7 +497,7 @@ export default function DoctorPortalView() {
       {/* MODAL: FULL RECOVERY TWIN DIALOG */}
       {showTwinModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-surface p-6 shadow-2xl border border-line">
+          <div className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl bg-surface p-6 shadow-2xl border border-line">
             <div className="flex items-start justify-between border-b border-line pb-4">
               <div>
                 <div className="flex items-center gap-2.5">
@@ -519,9 +513,10 @@ export default function DoctorPortalView() {
 
               <button
                 onClick={() => setShowTwinModal(false)}
-                className="rounded-xl border border-line p-2 text-ink-soft hover:bg-surface-soft hover:text-ink"
+                aria-label="Close modal"
+                className="grid size-10 shrink-0 place-items-center rounded-xl border border-line text-ink-soft transition hover:bg-surface-soft hover:text-ink"
               >
-                <Icon name="x" className="size-4" />
+                <Icon name="x" className="size-4.5" />
               </button>
             </div>
 
@@ -609,7 +604,7 @@ export default function DoctorPortalView() {
             </div>
 
             {/* Modal Footer Actions */}
-            <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
               <button
                 onClick={() => {
                   exportPatientTelemetryPdf(currentPatient, doctorProfile);
@@ -635,7 +630,7 @@ export default function DoctorPortalView() {
       {/* MODAL: NEW PRESCRIPTION */}
       {showPrescriptionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl border border-line">
+          <div className="w-full max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain rounded-2xl bg-surface p-6 shadow-xl border border-line">
             <h3 className="font-display text-lg font-bold text-ink">Issue Digital Prescription</h3>
             <p className="text-xs text-ink-soft">Digitally signed & sent to patient device</p>
 
@@ -645,7 +640,7 @@ export default function DoctorPortalView() {
                 <select
                   value={prescriptionForm.patientId || currentPatient?.id}
                   onChange={(e) => setPrescriptionForm({ ...prescriptionForm, patientId: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink focus:border-brand focus:outline-none"
+                  className="mt-1 w-full max-w-full min-w-0 truncate rounded-xl border border-line bg-surface px-3 py-2 text-ink focus:border-brand focus:outline-none"
                 >
                   {resolvedPatients.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -713,7 +708,7 @@ export default function DoctorPortalView() {
                 />
               </div>
 
-              <div className="mt-5 flex justify-end gap-2">
+              <div className="mt-5 flex flex-wrap justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowPrescriptionModal(false)}
@@ -736,7 +731,7 @@ export default function DoctorPortalView() {
       {/* MODAL: RESCHEDULE APPOINTMENT */}
       {showRescheduleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl border border-line">
+          <div className="w-full max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain rounded-2xl bg-surface p-6 shadow-xl border border-line">
             <h3 className="font-display text-lg font-bold text-ink">Reschedule Visit</h3>
             <p className="text-xs text-ink-soft">{rescheduleTarget?.title}</p>
 
@@ -763,7 +758,7 @@ export default function DoctorPortalView() {
                 />
               </div>
 
-              <div className="mt-5 flex justify-end gap-2">
+              <div className="mt-5 flex flex-wrap justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowRescheduleModal(false)}
@@ -786,7 +781,7 @@ export default function DoctorPortalView() {
       {/* MODAL: EMERGENCY SOS TRIAGE */}
       {sosModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl border border-red-500/40">
+          <div className="w-full max-w-lg max-h-[90dvh] overflow-y-auto overscroll-contain rounded-2xl bg-surface p-6 shadow-xl border border-red-500/40">
             <div className="flex items-center gap-2 text-red-600">
               <Icon name="alert" className="size-5" />
               <h3 className="font-display text-lg font-bold">Emergency SOS Triage Response</h3>

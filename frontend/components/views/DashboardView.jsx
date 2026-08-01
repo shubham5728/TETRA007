@@ -66,7 +66,7 @@ export default function DashboardView() {
             </div>
           </div>
 
-          <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-5 border-line sm:grid-cols-4 lg:border-l lg:pl-8">
+          <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-5 sm:grid-cols-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
             <div>
               <p className="text-xs font-medium text-ink-faint">Change</p>
               <p
@@ -176,19 +176,7 @@ export default function DashboardView() {
 
         <div className="space-y-5">
           <Card>
-            <CardTitle 
-              eyebrow="Next visit" 
-              title="Upcoming appointment"
-              action={
-                <a 
-                  href="/appointments"
-                  className="px-3 py-1.5 bg-brand text-white text-sm font-semibold rounded-full flex items-center gap-1 hover:bg-brand/90 transition-colors"
-                >
-                  <Icon name="calendar" className="size-3.5" />
-                  Book
-                </a>
-              }
-            />
+            <CardTitle eyebrow="Next visit" title="Upcoming appointment" />
             {nextAppointment ? (
               <div className="rounded-2xl bg-surface-soft p-4">
                 <p className="font-display font-semibold text-ink">
@@ -258,7 +246,7 @@ export default function DashboardView() {
             twin.data.patient.discharged_on,
           )}`}
         />
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           {vitals.data.map((vital) => (
             <StatTile
               key={vital.id}

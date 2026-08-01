@@ -64,7 +64,7 @@ export default function DoctorSelectPatientView({
             hint="Select a patient from the dropdown to view and edit their full clinical records, twin, and prescriptions"
           />
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full min-w-0 flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
             <label htmlFor="patient-select" className="text-xs font-semibold text-ink-soft whitespace-nowrap">
               Active Patient:
             </label>
@@ -72,7 +72,7 @@ export default function DoctorSelectPatientView({
               id="patient-select"
               value={activePatient.id}
               onChange={(e) => handleSelect(e.target.value)}
-              className="rounded-xl border border-brand/40 bg-surface px-4 py-2.5 text-xs font-bold text-ink shadow-sm focus:border-brand focus:outline-none"
+              className="w-full max-w-full min-w-0 flex-1 truncate rounded-xl border border-brand/40 bg-surface px-3.5 py-2.5 text-xs font-bold text-ink shadow-sm focus:border-brand focus:outline-none sm:w-auto sm:max-w-xs"
             >
               {resolvedPatients.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -84,7 +84,7 @@ export default function DoctorSelectPatientView({
         </div>
 
         {/* Patient Sub-Navigation Tabs */}
-        <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-line pt-4">
+        <div className="mt-4 flex items-center gap-1.5 border-t border-line pt-4 overflow-x-auto pb-2 -mx-6 px-6 sm:mx-0 sm:px-0 sm:overflow-visible sm:flex-wrap">
           {[
             { id: "overview", label: "Overview & Vitals", icon: "activity" },
             { id: "twin", label: "Recovery Twin", icon: "brain" },
@@ -96,7 +96,7 @@ export default function DoctorSelectPatientView({
             <button
               key={tab.id}
               onClick={() => setPatientSubTab(tab.id)}
-              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+              className={`flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
                 patientSubTab === tab.id
                   ? "bg-brand text-white shadow-sm"
                   : "border border-line bg-surface text-ink-soft hover:bg-surface-soft hover:text-ink"
