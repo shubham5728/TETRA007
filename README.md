@@ -285,30 +285,101 @@ Schedule emergency follow-up
 
 # System Architecture
 
-```text
-Patient App (Offline First)
-          │
-          ▼
-AI Care Coordinator
-          │
-          ▼
-AURA Sentinel Engine
-          │
-          ▼
-Cloud Database
-          │
- ┌────────┴─────────┐
- │                  │
- ▼                  ▼
-Doctor Dashboard    Family Dashboard
- │                  │
- └────────┬─────────┘
-          ▼
-Rural Health Worker App
-          │
-          ▼
-Government Scheme Engine
+AURA CareLink follows a **five-layer, offline-first architecture**. Every client can operate without connectivity and reconciles with the cloud through a dedicated sync service.
+
+```mermaid
+flowchart TB
+    subgraph CLIENT["🖥️ Client Layer"]
+        direction LR
+        P["Patient App<br/><i>Next.js · Offline-First</i>"]
+        F["Family Care<br/>Dashboard"]
+        D["Doctor Intelligence<br/>Dashboard"]
+        R["Rural Health Worker App<br/><i>Offline · ASHA Workers</i>"]
+    end
+
+    subgraph API["⚙️ Application & API Layer"]
+        direction LR
+        GW["API Gateway<br/><i>FastAPI</i>"]
+        AUTH["Auth Service<br/><i>Firebase Auth · JWT</i>"]
+        SYNC["Offline Sync Service<br/><i>Conflict Resolution</i>"]
+        ESC["Smart Escalation Engine<br/><i>Threshold Rules</i>"]
+        NOTIF["Notification Service<br/><i>SMS · Push · SOS</i>"]
+    end
+
+    subgraph AI["🧠 AI & Intelligence Layer"]
+        direction LR
+        COORD["AI Care Coordinator<br/><i>Gemini · LangChain · RAG</i>"]
+        SIMP["Discharge Summary Simplifier<br/><i>Google Vision · Tesseract</i>"]
+        SENT["AURA Sentinel Engine™<br/><i>XGBoost · Scikit-learn</i>"]
+        TWIN["Recovery Twin™ Builder<br/><i>Feature Store</i>"]
+    end
+
+    subgraph DATA["🗄️ Data Layer"]
+        direction LR
+        PG[("PostgreSQL<br/><i>Clinical Records</i>")]
+        FB[("Firebase<br/><i>Realtime Sync</i>")]
+        VAULT[("Document Vault<br/><i>Reports · Scans</i>")]
+        CACHE[("Local Cache<br/><i>SQLite · IndexedDB</i>")]
+    end
+
+    subgraph EXT["🔗 Integration Layer"]
+        direction LR
+        GOV["Government Scheme Engine"]
+        EMR["Hospital EMR<br/><i>Roadmap</i>"]
+        WEAR["Wearables & Vitals<br/><i>Roadmap</i>"]
+    end
+
+    P & F & D & R --> GW
+    R -.->|"deferred sync"| SYNC
+    P -.->|"deferred sync"| CACHE
+
+    GW --> AUTH
+    GW --> COORD
+    GW --> SIMP
+    GW --> TWIN
+
+    TWIN --> SENT
+    SENT -->|"risk score"| ESC
+    ESC -->|"High Risk"| NOTIF
+    NOTIF -.->|"alert"| D
+    NOTIF -.->|"alert"| F
+
+    COORD --> PG
+    SIMP --> VAULT
+    TWIN --> PG
+    SENT --> PG
+    SYNC --> FB
+    CACHE -.-> SYNC
+    FB --> PG
+
+    GW --> GOV
+    EMR -.-> PG
+    WEAR -.-> TWIN
+
+    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#0d1b2a
+    classDef api fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px,color:#0d1b2a
+    classDef ai fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px,color:#0d1b2a
+    classDef data fill:#fff8e1,stroke:#ef6c00,stroke-width:1px,color:#0d1b2a
+    classDef ext fill:#fce4ec,stroke:#ad1457,stroke-width:1px,color:#0d1b2a
+
+    class P,F,D,R client
+    class GW,AUTH,SYNC,ESC,NOTIF api
+    class COORD,SIMP,SENT,TWIN ai
+    class PG,FB,VAULT,CACHE data
+    class GOV,EMR,WEAR ext
 ```
+
+### Layer Responsibilities
+
+| Layer                    | Responsibility                                                       | Core Technologies                     |
+| ------------------------ | -------------------------------------------------------------------- | ------------------------------------- |
+| **Client**               | Patient, caregiver, doctor and health-worker interfaces; offline capture | Next.js, React, Tailwind CSS          |
+| **Application & API**    | Request routing, authentication, escalation rules, sync & alerting   | FastAPI, Firebase Auth, JWT           |
+| **AI & Intelligence**    | Summary simplification, conversational care, risk & recovery scoring | Gemini API, LangChain, RAG, XGBoost   |
+| **Data**                 | Clinical records, realtime state, document storage, offline cache    | PostgreSQL, Firebase, SQLite          |
+| **Integration**          | Government schemes; EMR and wearable connectivity on the roadmap     | REST, Webhooks                        |
+
+> **Note:** Dashed edges (`-.->`) represent asynchronous or deferred paths — offline synchronisation, push alerts and roadmap integrations. Solid edges are synchronous request flows.
 
 ---
 
