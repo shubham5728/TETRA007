@@ -185,6 +185,17 @@ def build_cohort(db: Session) -> Patient:
                 "Take one Metformin tablet after breakfast and one after dinner. "
                 "You have already marked this morning's dose as taken."
             ),
+            assessment=(
+                "Here is your medicine plan for today. Metformin (500 mg) — take "
+                "one tablet after breakfast and one after dinner."
+            ),
+            recommended_action="Still to take today: Atorvastatin.",
+            recovery_advice=(
+                "Never double a dose to make up for a missed one, and do not "
+                "stop any medicine without asking your doctor first."
+            ),
+            topic="medication",
+            source="rules",
             created_at=datetime.now(timezone.utc) - timedelta(hours=3),
         ),
     ]

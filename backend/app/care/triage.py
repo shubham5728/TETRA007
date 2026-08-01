@@ -55,11 +55,17 @@ RED_FLAGS: tuple[Symptom, ...] = (
                           "turning blue"), HIGH, True),
     Symptom("stroke signs", ("paralysis", "paralysed", "can't move my",
                              "cannot move my", "face drooping",
-                             "slurred speech", "one side is weak"), HIGH, True),
+                             "face is drooping", "slurred speech",
+                             "speech is slurred", "one side is weak",
+                             "one side of my body"), HIGH, True),
     Symptom("severe allergic reaction", ("allergic reaction", "anaphylaxis",
                                          "throat is closing", "swollen throat",
                                          "swollen tongue", "lips swelling",
                                          "hives all over"), HIGH, True),
+    # A high fever after discharge is its own red flag, listed explicitly
+    # rather than reached by escalating an ordinary fever.
+    Symptom("high fever", ("high fever", "very high fever", "severe fever",
+                           "burning with fever"), HIGH, True),
 )
 
 # Everything else starts at a base level and can move with modifiers.
@@ -175,12 +181,13 @@ def assess(text: str) -> TriageResult:
         result.symptoms.append(symptom.label)
 
         level = symptom.base
-        if has_escalator:
-            level = _bump(level, 1)
-            result.escalated = True
-        elif has_persistence:
-            level = _bump(level, 1)
-            result.escalated = True
+        if has_escalator or has_persistence:
+            # Modifiers can lift Low to Moderate, but never manufacture an
+            # emergency. High is reserved for the red-flag list above, so a
+            # wording like "vomiting since yesterday" stays a same-day doctor
+            # call rather than becoming an ambulance case.
+            level = min(_bump(level, 1), MODERATE, key=lambda value: _ORDER[value])
+            result.escalated = level != symptom.base
         elif has_softener:
             level = _bump(level, -1)
             result.softened = True

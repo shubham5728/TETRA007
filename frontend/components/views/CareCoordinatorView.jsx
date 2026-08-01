@@ -108,8 +108,9 @@ function Simplifier() {
 export default function CareCoordinatorView() {
   const chat = useApi("/api/chat");
   const sentinel = useApi("/api/sentinel");
+  const meta = useApi("/api/chat/meta");
 
-  const sources = [chat, sentinel];
+  const sources = [chat, sentinel, meta];
   const loading = sources.some((source) => source.loading);
   const error = sources.find((source) => source.error)?.error;
 
@@ -137,10 +138,19 @@ export default function CareCoordinatorView() {
               they report goes straight into the Recovery Twin.
             </p>
           </div>
-          <Pill tone="mint">
-            <span className="size-1.5 animate-pulse rounded-full bg-mint-ink" />
-            Online
-          </Pill>
+          <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+            <Pill tone="mint">
+              <span className="size-1.5 animate-pulse rounded-full bg-mint-ink" />
+              Online
+            </Pill>
+            {/* Says plainly which engine is answering, so nothing is implied
+                that is not actually running. */}
+            <Pill tone={meta.data.llm_enabled ? "teal" : "neutral"}>
+              {meta.data.llm_enabled
+                ? "Rules triage + AI wording"
+                : "Rules triage · AI wording offline"}
+            </Pill>
+          </div>
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
@@ -160,6 +170,7 @@ export default function CareCoordinatorView() {
           <div className="min-h-0 flex-1">
             <ChatPanel
               initialMessages={chat.data}
+              quickChips={meta.data.quick_chips}
               onReply={() => sentinel.reload()}
             />
           </div>
