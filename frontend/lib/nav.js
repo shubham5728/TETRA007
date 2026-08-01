@@ -5,11 +5,13 @@
 export const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "grid", roles: ["patient"] },
   { href: "/recovery-twin", label: "Recovery Twin", icon: "heart", roles: ["patient"] },
-  { href: "/sentinel", label: "AURA Sentinel", icon: "radar", badge: "Live", roles: ["admin", "doctor"] },
+  { href: "/sentinel", label: "AURA Sentinel", icon: "radar", badge: "Live", roles: ["doctor"] },
   { href: "/care-coordinator", label: "AI Care Coordinator", icon: "chat", roles: ["patient", "caregiver"] },
   { href: "/wearables", label: "Wearables", icon: "watch", roles: ["patient"] },
   { href: "/doctor-portal", label: "Doctor Portal", icon: "stethoscope", roles: ["doctor"] },
   { href: "/caregiver-portal", label: "Caregiver Portal", icon: "users", roles: ["caregiver"] },
+  { href: "/admin-portal", label: "Admin Portal", icon: "hospital", roles: ["admin"] },
+  { href: "/gov-portal", label: "Government Schemes", icon: "bank", roles: ["gov"] },
   { href: "/appointments", label: "Appointments", icon: "calendar", roles: ["patient", "caregiver"] },
   { href: "/settings", label: "Settings", icon: "settings", roles: ["patient", "doctor", "caregiver", "admin", "gov"] },
 ];

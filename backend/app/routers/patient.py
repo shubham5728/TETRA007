@@ -249,6 +249,26 @@ def wearables(
 
 @router.get("/schemes", response_model=list[SchemeOut])
 def schemes(
-    _: Patient = Depends(current_patient), db: Session = Depends(get_db)
+    _: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> list[Scheme]:
     return list(db.scalars(select(Scheme).order_by(Scheme.id)))
+
+
+@router.post("/sos", response_model=AlertOut, status_code=status.HTTP_201_CREATED)
+def trigger_sos(
+    patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
+    db: Session = Depends(get_db),
+) -> Alert:
+    """Trigger an emergency SOS alert."""
+    alert = Alert(
+        patient_id=patient.id,
+        title="🚨 Emergency SOS Triggered",
+        detail=f"Emergency SOS triggered for {patient.name}. Immediate assistance required.",
+        severity="critical",
+        acknowledged=False,
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+    return alert

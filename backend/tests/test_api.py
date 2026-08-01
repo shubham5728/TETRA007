@@ -22,8 +22,8 @@ def test_health_reports_model_loaded(client):
         ("patient@auracarelink.com", "patient", "/dashboard"),
         ("doctor@auracarelink.com", "doctor", "/doctor-portal"),
         ("caregiver@auracarelink.com", "caregiver", "/caregiver-portal"),
-        ("admin@auracarelink.com", "admin", "/sentinel"),
-        ("gov@auracarelink.com", "gov", "/settings"),
+        ("admin@auracarelink.com", "admin", "/admin-portal"),
+        ("gov@auracarelink.com", "gov", "/gov-portal"),
     ],
 )
 def test_every_role_can_sign_in(client, email, role, workspace):
