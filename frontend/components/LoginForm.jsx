@@ -2,48 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { login, setViewingPatientId } from "@/lib/api";
 import { Icon } from "./Icons";
 
 const DEMO_PASSWORD = "AuraCare2025";
 
-// Each role opens the workspace built for it. Hospital Admin and Government
-// Authority land on the closest existing screen — those two workspaces are not
-// built yet.
+// Prefill only. The destination comes back from the API, which is the authority
+// on what a role is allowed to open.
 const roles = [
-  {
-    id: "patient",
-    label: "Patient",
-    icon: "heart",
-    email: "patient@auracarelink.com",
-    href: "/dashboard",
-  },
-  {
-    id: "doctor",
-    label: "Doctor",
-    icon: "stethoscope",
-    email: "doctor@auracarelink.com",
-    href: "/doctor-portal",
-  },
-  {
-    id: "caregiver",
-    label: "Caregiver",
-    icon: "users",
-    email: "caregiver@auracarelink.com",
-    href: "/caregiver-portal",
-  },
-  {
-    id: "admin",
-    label: "Hospital Admin",
-    icon: "hospital",
-    email: "admin@auracarelink.com",
-    href: "/sentinel",
-  },
+  { id: "patient", label: "Patient", icon: "heart", email: "patient@auracarelink.com" },
+  { id: "doctor", label: "Doctor", icon: "stethoscope", email: "doctor@auracarelink.com" },
+  { id: "caregiver", label: "Caregiver", icon: "users", email: "caregiver@auracarelink.com" },
+  { id: "admin", label: "Hospital Admin", icon: "hospital", email: "admin@auracarelink.com" },
   {
     id: "gov",
     label: "Government Authority",
     icon: "bank",
     email: "gov@auracarelink.com",
-    href: "/settings",
     wide: true,
   },
 ];
@@ -53,6 +28,8 @@ export default function LoginForm() {
   const [roleId, setRoleId] = useState("patient");
   const [email, setEmail] = useState(roles[0].email);
   const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   const selected = roles.find((role) => role.id === roleId);
 
@@ -60,11 +37,22 @@ export default function LoginForm() {
     setRoleId(role.id);
     setEmail(role.email); // keep the prefilled credentials in step with the role
     setPassword(DEMO_PASSWORD);
+    setError(null);
   }
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    router.push(selected.href);
+    setBusy(true);
+    setError(null);
+    try {
+      const session = await login(email, password);
+      // Roles that are not tied to one patient start on the demo patient.
+      if (!session.user.patient_id) setViewingPatientId(1);
+      router.replace(session.workspace);
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
   }
 
   return (
@@ -78,7 +66,7 @@ export default function LoginForm() {
       </p>
 
       <form onSubmit={submit} className="mt-7">
-        <fieldset>
+        <fieldset disabled={busy}>
           <legend className="sr-only">Choose a workspace role</legend>
           <div className="grid grid-cols-2 gap-3">
             {roles.map((role) => {
@@ -106,36 +94,47 @@ export default function LoginForm() {
               );
             })}
           </div>
+
+          <div className="mt-4 space-y-3">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                autoComplete="username"
+                required
+                className="w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand disabled:opacity-60"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete="current-password"
+                required
+                className="w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-sm text-ink outline-none transition focus:border-brand disabled:opacity-60"
+              />
+            </div>
+          </div>
         </fieldset>
 
-        <div className="mt-4 space-y-3">
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="username"
-              className="w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-              className="w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-sm text-ink outline-none transition focus:border-brand"
-            />
-          </div>
-        </div>
+        {error ? (
+          <p
+            role="alert"
+            className="mt-4 rounded-xl border border-risk-high/20 bg-risk-high/5 px-4 py-3 text-sm text-risk-high"
+          >
+            {error}
+          </p>
+        ) : null}
 
         <p className="mt-5 text-center text-sm text-ink-soft">
           Selected workspace:{" "}
@@ -144,21 +143,17 @@ export default function LoginForm() {
 
         <button
           type="submit"
-          className="mt-3 flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand px-5 py-4 font-display text-base font-semibold text-white transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          disabled={busy}
+          className="mt-3 flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand px-5 py-4 font-display text-base font-semibold text-white transition hover:opacity-90 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Enter {selected.label} workspace
-          <Icon name="arrowRight" className="size-5" />
+          {busy ? "Signing in…" : `Enter ${selected.label} workspace`}
+          {busy ? null : <Icon name="arrowRight" className="size-5" />}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm leading-relaxed text-ink-soft">
         Demo password: <span className="font-semibold text-ink">{DEMO_PASSWORD}</span>.
         Sessions are encrypted and role-aware.
-      </p>
-
-      <p className="mt-3 text-center text-xs text-ink-faint">
-        Prototype: sign-in is not connected to Firebase Auth yet, so any
-        credentials open the selected workspace.
       </p>
     </div>
   );

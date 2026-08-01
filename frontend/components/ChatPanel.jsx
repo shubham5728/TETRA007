@@ -1,48 +1,49 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/lib/api";
+import { clockTime } from "@/lib/format";
 import { Icon } from "./Icons";
 
-const SAMPLE_REPLY =
-  "Thank you for telling me. I have saved this to your Recovery Twin. If it gets worse, I will alert your doctor straight away.";
-
 /**
- * Chat transcript for the AI Care Coordinator.
+ * AI Care Coordinator transcript.
  *
- * Replies are sample text — the Gemini call is not wired up yet, and the UI
- * says so rather than pretending the answer came from a model.
+ * Replies come from the backend assistant, which can re-score the patient when
+ * a message mentions something urgent.
  */
-export default function ChatPanel({ initialMessages }) {
-  const [messages, setMessages] = useState(initialMessages);
+export default function ChatPanel({ initialMessages, onReply }) {
+  const [messages, setMessages] = useState(initialMessages ?? []);
   const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
 
-  function send(event) {
+  async function send(event) {
     event.preventDefault();
     const text = draft.trim();
-    if (!text) return;
+    if (!text || busy) return;
 
-    const time = new Date().toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-
-    setMessages((prev) => [
-      ...prev,
-      { from: "patient", text, time },
-      { from: "aura", text: SAMPLE_REPLY, time },
-    ]);
-    setDraft("");
+    setBusy(true);
+    setError(null);
+    try {
+      const created = await api.post("/api/chat", { text });
+      setMessages((previous) => [...previous, ...created]);
+      setDraft("");
+      await onReply?.();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="flex h-full flex-col">
-      <ul className="flex-1 space-y-4 overflow-y-auto pr-1">
-        {messages.map((message, index) => {
-          const fromPatient = message.from === "patient";
+      <ul className="max-h-[420px] flex-1 space-y-4 overflow-y-auto pr-1">
+        {messages.map((message) => {
+          const fromPatient = message.sender === "patient";
           return (
             <li
-              key={`${message.time}-${index}`}
+              key={message.id}
               className={`flex gap-3 ${fromPatient ? "justify-end" : ""}`}
             >
               {!fromPatient ? (
@@ -73,12 +74,23 @@ export default function ChatPanel({ initialMessages }) {
                     fromPatient ? "text-white/60" : "text-ink-faint"
                   }`}
                 >
-                  {message.time}
+                  {clockTime(message.created_at)}
                 </p>
               </div>
             </li>
           );
         })}
+
+        {busy ? (
+          <li className="flex gap-3">
+            <span className="mt-1 grid size-8 shrink-0 place-items-center rounded-full bg-teal-soft text-teal">
+              <Icon name="sparkle" className="size-4" />
+            </span>
+            <div className="rounded-2xl rounded-bl-md bg-surface-soft px-4 py-3 text-sm text-ink-faint">
+              AURA is checking your record…
+            </div>
+          </li>
+        ) : null}
       </ul>
 
       <form onSubmit={send} className="mt-5 flex items-center gap-2">
@@ -87,21 +99,28 @@ export default function ChatPanel({ initialMessages }) {
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Ask about medicines, symptoms or your next visit…"
           aria-label="Message the AI Care Coordinator"
-          className="min-w-0 flex-1 rounded-xl border border-line bg-surface-soft px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand focus:bg-surface"
+          disabled={busy}
+          className="min-w-0 flex-1 rounded-xl border border-line bg-surface-soft px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand focus:bg-surface disabled:opacity-60"
         />
         <button
           type="submit"
           className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand text-white transition hover:opacity-90 disabled:opacity-40"
-          disabled={!draft.trim()}
+          disabled={!draft.trim() || busy}
           aria-label="Send message"
         >
           <Icon name="chevron" className="size-5" />
         </button>
       </form>
 
+      {error ? (
+        <p role="alert" className="mt-2 text-sm text-risk-high">
+          {error}
+        </p>
+      ) : null}
+
       <p className="mt-2.5 text-xs text-ink-faint">
-        Prototype: replies are sample text. Connecting the Gemini API will make
-        these answers live.
+        Replies come from the backend assistant. Saying something urgent — for
+        example &quot;I feel breathless&quot; — re-scores your risk immediately.
       </p>
     </div>
   );
