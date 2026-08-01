@@ -4,15 +4,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
+from app.models import Patient
 from app.ml import sentinel as engine_ml
 from app.routers import auth, coordinator, patient, sentinel
+from app.seed import seed
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     # Tables are created on boot so a fresh clone runs without a migration step.
     Base.metadata.create_all(bind=engine)
+    
+    db = SessionLocal()
+    try:
+        if db.query(Patient).count() == 0:
+            seed()
+    finally:
+        db.close()
+        
     yield
 
 
