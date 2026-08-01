@@ -137,31 +137,15 @@ Take one tablet after breakfast and one after dinner.
 
 ## Smart Escalation Engine
 
-Automatically notifies doctors and caregivers when patient risk crosses predefined thresholds.
+Automatically alerts doctors and caregivers when a patient's risk crosses a defined threshold.
 
-Example:
+**Example**
 
-- Missed medication
-- Fever
-- Breathlessness
-- Low activity
-- Missed follow-up
-
-↓
-
-**Readmission Risk: 89%**
-
-↓
-
-Doctor alerted
-
-↓
-
-Caregiver notified
-
-↓
-
-Emergency consultation recommended
+| Stage             | Detail                                                                   |
+| ----------------- | ------------------------------------------------------------------------ |
+| Signals detected  | Missed medication, fever, breathlessness, low activity, missed follow-up |
+| Risk calculated   | Readmission Risk: **89%**                                                |
+| Actions triggered | Doctor alerted → Caregiver notified → Emergency consultation recommended |
 
 ---
 
