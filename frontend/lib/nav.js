@@ -3,15 +3,15 @@
 // title after a rename.
 
 export const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: "grid" },
-  { href: "/recovery-twin", label: "Recovery Twin", icon: "heart" },
-  { href: "/sentinel", label: "AURA Sentinel", icon: "radar", badge: "Live" },
-  { href: "/care-coordinator", label: "AI Care Coordinator", icon: "chat" },
-  { href: "/wearables", label: "Wearables", icon: "watch" },
-  { href: "/doctor-portal", label: "Doctor Portal", icon: "stethoscope" },
-  { href: "/caregiver-portal", label: "Caregiver Portal", icon: "users" },
-  { href: "/appointments", label: "Appointments", icon: "calendar" },
-  { href: "/settings", label: "Settings", icon: "settings" },
+  { href: "/dashboard", label: "Dashboard", icon: "grid", roles: ["patient"] },
+  { href: "/recovery-twin", label: "Recovery Twin", icon: "heart", roles: ["patient"] },
+  { href: "/sentinel", label: "AURA Sentinel", icon: "radar", badge: "Live", roles: ["admin", "doctor"] },
+  { href: "/care-coordinator", label: "AI Care Coordinator", icon: "chat", roles: ["patient", "caregiver"] },
+  { href: "/wearables", label: "Wearables", icon: "watch", roles: ["patient"] },
+  { href: "/doctor-portal", label: "Doctor Portal", icon: "stethoscope", roles: ["doctor"] },
+  { href: "/caregiver-portal", label: "Caregiver Portal", icon: "users", roles: ["caregiver"] },
+  { href: "/appointments", label: "Appointments", icon: "calendar", roles: ["patient", "caregiver"] },
+  { href: "/settings", label: "Settings", icon: "settings", roles: ["patient", "doctor", "caregiver", "admin", "gov"] },
 ];
 
 export function findNavItem(pathname) {
