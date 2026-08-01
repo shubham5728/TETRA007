@@ -30,11 +30,7 @@ class Settings(BaseSettings):
     # rule-based path, which is what runs today.
     gemini_api_key: str | None = None
 
-    cors_origins: list[str] = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-    ]
+    cors_origins: list[str] = ["*"]
 
 
 @lru_cache
