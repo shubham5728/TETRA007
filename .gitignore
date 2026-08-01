@@ -19,6 +19,8 @@ yarn-error.log*
 backend/.venv/
 backend/.pytest_cache/
 
-# Rebuilt with: python -m app.ml.train && python -m app.seed
+# Rebuilt with: python -m app.seed
 backend/aura.db
-backend/app/ml/*.joblib
+
+# The trained model IS committed on purpose, so the repo runs straight after a
+# clone with no training step. Retrain with: python -m app.ml.train

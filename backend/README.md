@@ -135,4 +135,9 @@ Copy `.env.example` to `.env` to override any of it.
 | `JWT_SECRET` | `dev-only-change-me` — **change this outside development** |
 | `ACCESS_TOKEN_MINUTES` | `720` |
 | `GEMINI_API_KEY` | unset (simplifier uses the rules engine) |
-| `CORS_ORIGINS` | `http://localhost:3000` |
+| `CORS_ORIGINS` | `["*"]` — open, so any deployed frontend can call it |
+
+`CORS_ORIGINS` is `["*"]` to keep deployment easy during the hackathon. Because
+of that, `allow_credentials` is `False` (browsers reject a wildcard origin
+combined with credentials). Auth travels in the `Authorization` header, not a
+cookie, so this works — but narrow the origins list before any real use.
