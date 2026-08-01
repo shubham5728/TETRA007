@@ -63,6 +63,12 @@ class VitalCreate(BaseModel):
     status: str = "normal"
 
 
+class MedicationCreate(BaseModel):
+    name: str
+    dose: str
+    schedule: str
+
+
 class MedicationOut(ORMModel):
     id: int
     name: str

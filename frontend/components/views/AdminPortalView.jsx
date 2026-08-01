@@ -4,6 +4,7 @@ import { ErrorState, Loading } from "@/components/DataStates";
 import { Icon } from "@/components/Icons";
 import { Card, CardTitle, ProgressBar, StatTile } from "@/components/ui";
 import { useApi } from "@/lib/useApi";
+import Link from "next/link";
 
 export default function AdminPortalView() {
   const patients = useApi("/api/doctor/patients");

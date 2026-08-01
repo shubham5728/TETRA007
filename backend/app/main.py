@@ -7,7 +7,7 @@ from app.config import settings
 from app.database import Base, engine, SessionLocal
 from app.models import Patient
 from app.ml import sentinel as engine_ml
-from app.routers import auth, coordinator, patient, sentinel
+from app.routers import auth, coordinator, patient, sentinel, admin
 from app.seed import seed
 
 
@@ -49,6 +49,7 @@ app.include_router(auth.router)
 app.include_router(patient.router)
 app.include_router(sentinel.router)
 app.include_router(coordinator.router)
+app.include_router(admin.router)
 
 
 @app.get("/api/health", tags=["meta"])
