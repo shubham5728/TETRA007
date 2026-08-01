@@ -11,35 +11,11 @@ export default function Sidebar({ onNavigate }) {
   const searchParams = useSearchParams();
   const { user } = useSession();
 
+  const userRole = user?.role || "patient";
   const filteredItems = navItems.filter((item) => {
-    // Portals restricted to specific roles
-    const portals = {
-      "/doctor-portal": "doctor",
-      "/caregiver-portal": "caregiver",
-      "/gov-portal": "gov",
-    };
-    
-    // If the item is a restricted portal, only show it to the matching role
-    if (portals[item.href]) {
-      if (user?.role !== portals[item.href]) {
-        return false;
-      }
+    if (item.roles) {
+      return item.roles.includes(userRole);
     }
-    
-    // Government users should ONLY see the Government Portal and Settings
-    if (user?.role === "gov") {
-      if (item.href !== "/gov-portal" && item.href !== "/settings") {
-        return false;
-      }
-    }
-    
-    // Doctor users should ONLY see the Doctor Portal and Settings
-    if (user?.role === "doctor") {
-      if (item.href !== "/doctor-portal" && item.href !== "/settings") {
-        return false;
-      }
-    }
-    
     return true;
   });
 
@@ -64,7 +40,12 @@ export default function Sidebar({ onNavigate }) {
         <nav aria-label="Main">
           <ul className="space-y-1">
             {filteredItems.map((item) => {
-              const active = pathname.startsWith(item.href);
+              const currentSearch = searchParams?.toString() ? `?${searchParams.toString()}` : "";
+              const currentFull = pathname + currentSearch;
+              const active =
+                item.href === currentFull ||
+                (!searchParams?.get("tab") && item.href === "/doctor-portal?tab=queue" && pathname === "/doctor-portal") ||
+                (!item.href.includes("?") && pathname.startsWith(item.href));
               return (
                 <li key={item.href}>
                   <Link

@@ -24,6 +24,14 @@ export default function SettingsView() {
   const schemes = useApi("/api/patient/schemes");
   const health = useApi("/api/health");
 
+  const [langCode, setLangCode] = useState("en");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLangCode(localStorage.getItem("aura.lang") || "en");
+    }
+  }, []);
+
   const sources = [patient, schemes, health];
   const loading = sources.some((source) => source.loading);
   const error = sources.find((source) => source.error)?.error;
@@ -37,14 +45,6 @@ export default function SettingsView() {
       />
     );
   }
-
-  const [langCode, setLangCode] = useState("en");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setLangCode(localStorage.getItem("aura.lang") || "en");
-    }
-  }, []);
 
   function changeLang(code) {
     setLangCode(code);
