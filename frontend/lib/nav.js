@@ -5,17 +5,29 @@
 export const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "grid", roles: ["patient"] },
   { href: "/recovery-twin", label: "Recovery Twin", icon: "heart", roles: ["patient"] },
-  { href: "/sentinel", label: "AURA Sentinel", icon: "radar", badge: "Live", roles: ["doctor"] },
   { href: "/care-coordinator", label: "AI Care Coordinator", icon: "chat", roles: ["patient", "caregiver"] },
   { href: "/wearables", label: "Wearables", icon: "watch", roles: ["patient"] },
-  { href: "/doctor-portal", label: "Doctor Portal", icon: "stethoscope", roles: ["doctor"] },
+  
+  // Doctor Workspace Navigation Items
+  { href: "/doctor-portal?tab=queue", label: "All Patient", icon: "users", roles: ["doctor"] },
+  { href: "/doctor-portal?tab=appointments", label: "Appointments & Visits", icon: "calendar", roles: ["doctor"] },
+  { href: "/doctor-portal?tab=select_patient", label: "Patient Details", icon: "userCheck", roles: ["doctor"] },
+  { href: "/sentinel", label: "AURA Sentinel", icon: "radar", badge: "Live", roles: ["doctor"] },
+  { href: "/doctor-portal?tab=settings", label: "Doctor Profile & Settings", icon: "settings", roles: ["doctor"] },
+
   { href: "/caregiver-portal", label: "Caregiver Portal", icon: "users", roles: ["caregiver"] },
   { href: "/admin-portal", label: "Admin Portal", icon: "hospital", roles: ["admin"] },
   { href: "/gov-portal", label: "Government Schemes", icon: "bank", roles: ["gov"] },
   { href: "/appointments", label: "Appointments", icon: "calendar", roles: ["patient", "caregiver"] },
-  { href: "/settings", label: "Settings", icon: "settings", roles: ["patient", "doctor", "caregiver", "admin", "gov"] },
+  { href: "/settings", label: "Settings", icon: "settings", roles: ["patient", "caregiver", "admin", "gov"] },
 ];
 
-export function findNavItem(pathname) {
-  return navItems.find((item) => pathname.startsWith(item.href));
+export function findNavItem(pathname, search = "") {
+  const full = pathname + search;
+  return (
+    navItems.find((item) => item.href === full) ||
+    navItems.find((item) => item.href === pathname) ||
+    navItems.find((item) => item.href.startsWith(pathname) && !item.href.includes("?")) ||
+    navItems.find((item) => item.href.startsWith(pathname))
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { findNavItem } from "@/lib/nav";
 import { clearSession } from "@/lib/api";
 import { useSession } from "@/lib/useApi";
@@ -25,10 +25,14 @@ function initialsFor(name) {
 
 export default function Header({ onOpenMenu }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useSession();
 
-  const current = findNavItem(pathname);
+  const currentTab = searchParams.get("tab");
+  const search = currentTab ? `?tab=${currentTab}` : "";
+
+  const current = findNavItem(pathname, search);
   const title = current?.label ?? "Dashboard";
 
   function signOut() {

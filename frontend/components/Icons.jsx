@@ -56,6 +56,13 @@ const paths = {
       <path d="M17.5 14.2A6.5 6.5 0 0 1 21.5 20" />
     </>
   ),
+  userCheck: (
+    <>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 11.5 0" />
+      <path d="m15 11 2 2 4-4" />
+    </>
+  ),
   calendar: (
     <>
       <rect x="3" y="5" width="18" height="16" rx="2.5" />
@@ -120,6 +127,7 @@ const paths = {
     </>
   ),
   check: <path d="m5 12.5 4.5 4.5L19 7" />,
+  x: <path d="M18 6 6 18M6 6l12 12" />,
   alert: (
     <>
       <path d="M10.3 3.9 2.4 17.2A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" />
