@@ -1,26 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { navItems } from "@/lib/nav";
 import { useSession } from "@/lib/useApi";
 import { BrandMark, Icon } from "./Icons";
 
 export default function Sidebar({ onNavigate }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useSession();
 
-  // If session is not ready yet, we can either render nothing or full list.
-  // We'll render filtered items if user exists, else empty.
+  const currentTab = searchParams.get("tab");
+  const fullUrl = pathname + (currentTab ? `?tab=${currentTab}` : "");
+
+  // Render items based on role
   const filteredNavItems = user
     ? navItems.filter((item) => item.roles.includes(user.role))
     : [];
 
-  // Where the brand logo redirects
   const getWorkspace = (role) => {
     switch (role) {
       case "patient": return "/dashboard";
-      case "doctor": return "/doctor-portal";
+      case "doctor": return "/doctor-portal?tab=queue";
       case "caregiver": return "/caregiver-portal";
       case "admin": return "/sentinel";
       case "gov": return "/settings";
@@ -49,7 +51,10 @@ export default function Sidebar({ onNavigate }) {
         <nav aria-label="Main">
           <ul className="space-y-1">
             {filteredNavItems.map((item) => {
-              const active = pathname.startsWith(item.href);
+              const active = item.href.includes("?")
+                ? fullUrl === item.href || (pathname === "/doctor-portal" && !currentTab && item.href.endsWith("tab=queue"))
+                : pathname.startsWith(item.href);
+
               return (
                 <li key={item.href}>
                   <Link
@@ -58,7 +63,7 @@ export default function Sidebar({ onNavigate }) {
                     aria-current={active ? "page" : undefined}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
                       active
-                        ? "bg-brand-soft font-semibold text-brand"
+                        ? "bg-brand-soft font-semibold text-brand shadow-sm"
                         : "font-medium text-ink-soft hover:bg-surface-soft hover:text-ink"
                     }`}
                   >
@@ -66,7 +71,7 @@ export default function Sidebar({ onNavigate }) {
                       name={item.icon}
                       className={`size-5 ${active ? "text-brand" : "text-ink-faint group-hover:text-ink-soft"}`}
                     />
-                    <span className="flex-1">{item.label}</span>
+                    <span className="flex-1 text-xs">{item.label}</span>
                     {item.badge ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-mint px-2 py-0.5 text-[10px] font-bold text-mint-ink">
                         <span className="size-1.5 animate-pulse rounded-full bg-mint-ink" />

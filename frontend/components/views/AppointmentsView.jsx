@@ -9,7 +9,7 @@ import { useApi } from "@/lib/useApi";
 const MODE_ICON = {
   "In person": "hospital",
   "Home visit": "users",
-  "Video call": "chat",
+  "ASHA visit": "users",
   Lab: "file",
 };
 
@@ -148,8 +148,8 @@ export default function AppointmentsView() {
               },
               {
                 icon: "chat",
-                title: "Video consultation",
-                detail: "Works on a low-bandwidth connection.",
+                title: "ASHA audio check-in",
+                detail: "Voice sync through the ASHA worker device.",
               },
               {
                 icon: "wifiOff",
