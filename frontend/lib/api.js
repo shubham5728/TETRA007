@@ -6,8 +6,15 @@
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-const TOKEN_KEY = "aura.token";
-const USER_KEY = "aura.user";
+export const TOKEN_KEY = "aura.token";
+export const USER_KEY = "aura.user";
+
+/** Lets hooks subscribe to session changes made in another tab. */
+export function subscribeToStorage(callback) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
 
 export class ApiError extends Error {
   constructor(message, status) {

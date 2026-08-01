@@ -1,23 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getToken } from "@/lib/api";
+import { useMounted, useToken } from "@/lib/useApi";
 
 /** Keeps signed-out visitors out of the workspace. */
 export default function AuthGuard({ children }) {
   const router = useRouter();
-  const [allowed, setAllowed] = useState(false);
+  const mounted = useMounted();
+  const token = useToken();
 
   useEffect(() => {
-    if (getToken()) {
-      setAllowed(true);
-    } else {
-      router.replace("/login");
-    }
-  }, [router]);
+    // Only decide once the browser has told us what is in storage.
+    if (mounted && !token) router.replace("/login");
+  }, [mounted, token, router]);
 
-  if (!allowed) {
+  if (!mounted || !token) {
     return (
       <div className="grid min-h-dvh place-items-center bg-canvas">
         <p className="text-sm text-ink-faint">Checking your session…</p>
