@@ -61,3 +61,13 @@ def doctor_headers(client):
 @pytest.fixture
 def caregiver_headers(client):
     return {"Authorization": f"Bearer {_login(client, 'caregiver@auracarelink.com')}"}
+
+
+@pytest.fixture
+def admin_headers(client):
+    return {"Authorization": f"Bearer {_login(client, 'admin@auracarelink.com')}"}
+
+
+@pytest.fixture
+def gov_headers(client):
+    return {"Authorization": f"Bearer {_login(client, 'gov@auracarelink.com')}"}

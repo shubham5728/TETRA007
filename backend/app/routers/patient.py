@@ -20,6 +20,7 @@ from app.schemas import (
     AppointmentOut,
     MedicationOut,
     MedicationTake,
+    MedicationCreate,
     PatientOut,
     SchemeOut,
     SymptomCreate,
@@ -132,6 +133,35 @@ def medications(
             .order_by(Medication.id)
         )
     )
+
+
+@router.post("/medications", response_model=MedicationOut, status_code=201)
+def prescribe_medication(
+    payload: MedicationCreate,
+    db: Session = Depends(get_db),
+    # Only doctors (or authorized roles) can prescribe
+    patient: Patient = Depends(writable_patient("doctor", "admin")),
+) -> Medication:
+    """Prescribe a new medication for the patient."""
+    from app.services import simplifier
+    
+    # Generate simplified plain text instructions
+    raw_instruction = f"{payload.name} {payload.dose} {payload.schedule}"
+    simplified = simplifier.simplify_prescription(raw_instruction)
+    
+    med = Medication(
+        patient_id=patient.id,
+        name=payload.name,
+        dose=payload.dose,
+        schedule=payload.schedule,
+        plain=simplified,
+        adherence=100,  # Starts perfectly
+        taken_today=False,
+    )
+    db.add(med)
+    db.commit()
+    db.refresh(med)
+    return med
 
 
 @router.post("/medications/{medication_id}/take", response_model=MedicationOut)
