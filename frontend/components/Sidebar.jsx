@@ -26,12 +26,23 @@ export default function Sidebar({ onNavigate }) {
       <Link
         href="/dashboard"
         onClick={onNavigate}
-        className="flex items-center gap-3 rounded-xl px-1 py-1 transition hover:opacity-90"
+        className="flex items-center gap-3 rounded-2xl border border-line bg-surface-soft/80 p-2.5 shadow-sm transition hover:border-brand/40 hover:bg-surface-soft"
       >
-        <BrandMark />
-        <span className="font-display text-lg font-semibold tracking-tight text-ink">
-          AURA CareLink
+        <span className="grid size-10 place-items-center rounded-xl bg-white border border-line/80 p-1 shadow-sm shrink-0">
+          <img
+            src="/logo.png"
+            alt="AURA CareLink Logo"
+            className="size-full object-contain"
+          />
         </span>
+        <div className="min-w-0">
+          <span className="font-display text-base font-bold tracking-tight text-ink block leading-tight">
+            AURA CareLink
+          </span>
+          <span className="text-[10px] font-bold text-brand uppercase tracking-wider block mt-0.5">
+            AI Care. Human Touch.
+          </span>
+        </div>
       </Link>
 
       <div className="flex-1 overflow-y-auto">

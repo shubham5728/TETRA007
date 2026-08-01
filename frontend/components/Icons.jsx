@@ -216,13 +216,15 @@ export function Icon({ name, className = "size-5", strokeWidth = 1.7, ...rest })
   );
 }
 
-// The product mark: a rounded tile with the heart-pulse glyph.
-export function BrandMark({ className = "size-9" }) {
+// The product mark: official AURA CareLink logo badge with contrast tile
+export function BrandMark({ className = "size-10" }) {
   return (
-    <span
-      className={`${className} grid place-items-center rounded-xl bg-gradient-to-br from-brand to-teal text-white shadow-sm shadow-brand/30`}
-    >
-      <Icon name="heart" className="size-5" strokeWidth={1.9} />
+    <span className={`grid place-items-center rounded-xl bg-white border border-line/80 p-1.5 shadow-sm shrink-0 ${className}`}>
+      <img
+        src="/logo.png"
+        alt="AURA CareLink Logo"
+        className="size-full object-contain"
+      />
     </span>
   );
 }
