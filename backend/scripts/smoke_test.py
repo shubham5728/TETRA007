@@ -84,12 +84,36 @@ def main() -> int:
             client.get(f"{API}/api/patient").status_code == 401,
         )
 
+        for email, role, _ in [
+            ("patient@auracarelink.com", "patient", "/dashboard"),
+            ("doctor@auracarelink.com", "doctor", "/doctor-portal"),
+            ("caregiver@auracarelink.com", "caregiver", "/caregiver-portal"),
+            ("admin@auracarelink.com", "admin", "/admin-portal"),
+            ("gov@auracarelink.com", "gov", "/gov-portal"),
+        ]:
+            sessions[role] = sign_in(client, email)
+
         patient = auth(sessions["patient"]["access_token"])
         doctor = auth(sessions["doctor"]["access_token"])
         caregiver = auth(sessions["caregiver"]["access_token"])
 
         # ------------------------------------------------------------- dashboard
         section("Dashboard")
+        w = sessions["patient"].get("workspace")
+        check("patient signs in and is routed to /dashboard", w == "/dashboard")
+
+        w = client.post(f"{API}/api/auth/login", json=creds("doctor")).json().get("workspace")
+        check("doctor signs in and is routed to /doctor-portal", w == "/doctor-portal")
+
+        w = client.post(f"{API}/api/auth/login", json=creds("caregiver")).json().get("workspace")
+        check("caregiver signs in and is routed to /caregiver-portal", w == "/caregiver-portal")
+
+        w = client.post(f"{API}/api/auth/login", json=creds("admin")).json().get("workspace")
+        check("admin signs in and is routed to /admin-portal", w == "/admin-portal")
+
+        w = client.post(f"{API}/api/auth/login", json=creds("gov")).json().get("workspace")
+        check("gov signs in and is routed to /gov-portal", w == "/gov-portal")
+
         twin = client.get(f"{API}/api/recovery-twin", headers=patient).json()
         sentinel = client.get(f"{API}/api/sentinel", headers=patient).json()
         meds = client.get(f"{API}/api/patient/medications", headers=patient).json()

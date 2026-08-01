@@ -10,14 +10,13 @@ from app.security import create_access_token, get_current_user, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-# Where each role lands after signing in. Hospital Admin and Government
-# Authority reuse the closest existing screen — those workspaces are not built.
+# Where each role lands after signing in.
 WORKSPACE_BY_ROLE = {
     "patient": "/dashboard",
     "doctor": "/doctor-portal",
     "caregiver": "/caregiver-portal",
-    "admin": "/sentinel",
-    "gov": "/settings",
+    "admin": "/admin-portal",
+    "gov": "/gov-portal",
 }
 
 INVALID = HTTPException(
