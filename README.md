@@ -31,61 +31,63 @@ _Complete platform overview — workflow, modules, features, architecture & tech
 
 ## About the Project
 
-AURA CareLink is an **AI-powered continuity of care platform** designed to support patients after hospital discharge, especially those living in **rural and remote communities** where follow-up care is limited.
+AURA CareLink is an **AI-powered platform that looks after patients once they leave the hospital**. It is built for people in **rural and remote areas**, where follow-up care is hard to get.
 
-The platform creates a **Recovery Twin™** for every discharged patient and continuously monitors recovery through medication adherence, symptom tracking, vitals, activity, and follow-up compliance. Using the **AURA Sentinel Engine™**, the system predicts **readmission and early relapse risk** before complications become critical, enabling timely intervention by doctors and caregivers.
+For every discharged patient, the platform builds a **Recovery Twin™** — a digital health profile that updates every day. It tracks medicines, symptoms, vitals, activity and follow-up visits.
 
-Built during the **36-hour TetraTHON 2026 Indo-French Hackathon**, AURA CareLink aims to bridge the gap between hospitals and patients through **AI, machine learning, predictive analytics, and offline-first healthcare technology**.
+The **AURA Sentinel Engine™** then studies this data and predicts the **risk of readmission or relapse** before the patient becomes seriously ill. Doctors and caregivers get alerted early, so they can act in time.
+
+The project is being built during the **36-hour TetraTHON 2026 Indo-French Hackathon**. The goal is to keep hospitals and patients connected using **AI, machine learning and offline-first technology**.
 
 ---
 
 # The Problem
 
-Millions of patients experience complications after leaving the hospital because they:
+Millions of patients get sick again after leaving the hospital because they:
 
-- Forget to take medications
-- Do not understand discharge instructions
+- Forget to take their medicines
+- Do not understand the discharge instructions
 - Miss follow-up appointments
-- Lack access to doctors in rural areas
-- Have no continuous recovery monitoring
+- Cannot reach a doctor in rural areas
+- Have nobody checking on their recovery
 
-These gaps often lead to **preventable hospital readmissions, delayed treatment, and increased healthcare costs**.
+Because of these gaps, patients end up **back in hospital when it could have been avoided**. Treatment gets delayed and healthcare costs go up.
 
 ---
 
 # Our Solution
 
-AURA CareLink connects **patients, caregivers, doctors, hospitals, and rural health workers** through one intelligent platform.
+AURA CareLink brings **patients, caregivers, doctors, hospitals and rural health workers** onto one platform.
 
-The platform provides:
+The platform:
 
-- AI-powered discharge summary simplification
-- Recovery Twin™ digital health profile
-- Predictive readmission risk analysis
-- Smart escalation and emergency alerts
-- Offline support for rural healthcare workers
-- Multilingual AI healthcare assistance
+- Turns discharge summaries into simple language using AI
+- Builds a Recovery Twin™ digital health profile for each patient
+- Predicts the risk of going back to hospital
+- Sends alerts when a patient's condition gets worse
+- Works offline for rural health workers
+- Answers health questions in the patient's own language
 
 ---
 
 # Platform Workflow
 
-The end-to-end patient journey, as illustrated in the [platform overview](AURA%20Carelink%20workflow.jpeg) above:
+The full patient journey, as shown in the [platform overview](AURA%20Carelink%20workflow.jpeg) above:
 
-| Step | Stage                          | What Happens                                                |
-| ---- | ------------------------------ | ----------------------------------------------------------- |
-| 1    | Hospital Discharge             | Patient is discharged with a medical summary                 |
-| 2    | AI Discharge Summary Simplifier | Report converted into simple, multilingual instructions      |
-| 3    | Recovery Profile Creation      | Patient health profile generated                             |
-| 4    | Recovery Twin™ Dashboard       | Live digital recovery profile activated                      |
-| 5    | Daily Monitoring & Check-ins   | Patient logs daily updates (offline supported)               |
-| 6    | Data Collection                | Symptoms, medications, vitals, activity, follow-ups captured |
-| 7    | AURA Sentinel Engine™          | AI/ML models analyse patterns across collected data          |
-| 8    | Risk Prediction & Analysis     | Readmission risk, recovery score & relapse risk computed     |
-| 9    | Smart Escalation Engine        | Risk classified as Low / Moderate / High                     |
-| 10   | Alerts & Notifications         | Doctors and caregivers alerted on threshold breach           |
-| 11   | Doctor / Caregiver Action      | Consultation, intervention or follow-up scheduled            |
-| 12   | Continuous Recovery & Support  | Loop continues until full recovery                           |
+| Step | Stage                           | What Happens                                                        |
+| ---- | ------------------------------- | ------------------------------------------------------------------- |
+| 1    | Hospital Discharge              | The patient leaves the hospital with a medical summary               |
+| 2    | AI Discharge Summary Simplifier | The report is rewritten in simple words, in the patient's language   |
+| 3    | Recovery Profile Creation       | A health profile is created for the patient                          |
+| 4    | Recovery Twin™ Dashboard        | The digital recovery profile goes live                               |
+| 5    | Daily Monitoring & Check-ins    | The patient adds daily updates — works offline too                   |
+| 6    | Data Collection                 | Symptoms, medicines, vitals, activity and follow-ups are recorded    |
+| 7    | AURA Sentinel Engine™           | AI models study the patterns in this data                            |
+| 8    | Risk Prediction & Analysis      | Readmission risk, recovery score and relapse risk are calculated     |
+| 9    | Smart Escalation Engine         | The patient is marked Low, Moderate or High risk                     |
+| 10   | Alerts & Notifications          | Doctors and caregivers are alerted if the risk crosses the safe limit |
+| 11   | Doctor / Caregiver Action       | A consultation or follow-up is arranged                              |
+| 12   | Continuous Recovery & Support   | The cycle repeats until the patient fully recovers                   |
 
 ---
 
@@ -93,31 +95,31 @@ The end-to-end patient journey, as illustrated in the [platform overview](AURA%2
 
 ## Recovery Twin™
 
-A dynamic AI-generated recovery profile that evolves daily based on:
+A digital health profile built by AI. It updates every day using:
 
 - Symptoms
-- Medications
+- Medicines
 - Vitals
 - Activity
-- Follow-up compliance
+- Follow-up visits attended
 - Recovery progress
 
 ---
 
 ## AURA Sentinel Engine™
 
-The predictive intelligence engine that estimates:
+The AI engine that predicts:
 
-- Readmission Probability
+- Chance of going back to hospital
 - Recovery Score
-- Early Relapse Risk
-- Patient Risk Level (Low / Moderate / High)
+- Chance of an early relapse
+- Risk Level (Low / Moderate / High)
 
 ---
 
 ## AI Discharge Summary Simplifier
 
-Transforms complex medical reports into simple, multilingual instructions patients can easily understand.
+Turns difficult medical reports into simple instructions, written in the patient's own language.
 
 Example:
 
@@ -151,18 +153,18 @@ Automatically alerts doctors and caregivers when a patient's risk crosses a defi
 
 # Platform Modules
 
-| Module                          | Purpose                                    |
-| ------------------------------- | ------------------------------------------ |
-| Recovery Twin™                  | Dynamic AI recovery profile                |
-| AURA Sentinel Engine™           | Predictive readmission & relapse detection |
-| Smart Escalation Engine         | Automatic high-risk escalation             |
-| AI Care Coordinator             | 24×7 multilingual AI assistant             |
-| AI Discharge Summary Simplifier | Simplifies medical reports                 |
-| Family Care Dashboard           | Caregiver monitoring & alerts              |
-| Doctor Intelligence Dashboard   | High-risk patient prioritization           |
-| Rural Health Worker Module      | Offline healthcare support                 |
-| Government Scheme Navigator     | Healthcare benefit assistance              |
-| Offline-First Architecture      | Works without continuous internet          |
+| Module                          | What It Does                                        |
+| ------------------------------- | --------------------------------------------------- |
+| Recovery Twin™                  | Keeps a daily health profile of the patient          |
+| AURA Sentinel Engine™           | Predicts readmission and relapse risk                |
+| Smart Escalation Engine         | Raises an alert when a patient becomes high risk     |
+| AI Care Coordinator             | Answers health questions 24×7 in any language        |
+| AI Discharge Summary Simplifier | Rewrites medical reports in simple words             |
+| Family Care Dashboard           | Lets family members track recovery and get alerts    |
+| Doctor Intelligence Dashboard   | Shows doctors their high-risk patients first         |
+| Rural Health Worker Module      | Helps ASHA workers collect data without internet     |
+| Government Scheme Navigator     | Helps patients find government health schemes        |
+| Offline-First Architecture      | Keeps working when there is no internet              |
 
 ---
 
@@ -186,19 +188,19 @@ Automatically alerts doctors and caregivers when a patient's risk crosses a defi
 ### Input Data
 
 - Symptoms
-- Medications
+- Medicines
 - Vitals
-- Medical History
-- Follow-up Compliance
-- Lifestyle Indicators
+- Medical history
+- Follow-up visits attended
+- Lifestyle habits
 
 ### AI Processing
 
-Machine learning models analyze patient patterns and generate:
+Machine learning models study the patient's patterns and produce:
 
 - Recovery Score
 - Readmission Risk
-- Early Relapse Probability
+- Chance of early relapse
 
 ### Example Prediction
 
@@ -269,7 +271,7 @@ Schedule emergency follow-up
 
 # System Architecture
 
-AURA CareLink follows a **five-layer, offline-first architecture**. Every client can operate without connectivity and reconciles with the cloud through a dedicated sync service.
+AURA CareLink is built in **five layers**. Every app keeps working without internet, and syncs with the cloud once the connection comes back.
 
 ```mermaid
 flowchart TB
@@ -355,15 +357,15 @@ flowchart TB
 
 ### Layer Responsibilities
 
-| Layer                    | Responsibility                                                       | Core Technologies                     |
-| ------------------------ | -------------------------------------------------------------------- | ------------------------------------- |
-| **Client**               | Patient, caregiver, doctor and health-worker interfaces; offline capture | Next.js, React, Tailwind CSS          |
-| **Application & API**    | Request routing, authentication, escalation rules, sync & alerting   | FastAPI, Firebase Auth, JWT           |
-| **AI & Intelligence**    | Summary simplification, conversational care, risk & recovery scoring | Gemini API, LangChain, RAG, XGBoost   |
-| **Data**                 | Clinical records, realtime state, document storage, offline cache    | PostgreSQL, Firebase, SQLite          |
-| **Integration**          | Government schemes; EMR and wearable connectivity on the roadmap     | REST, Webhooks                        |
+| Layer                 | What It Handles                                                     | Technologies Used                   |
+| --------------------- | ------------------------------------------------------------------- | ----------------------------------- |
+| **Client**            | The apps used by patients, families, doctors and health workers      | Next.js, React, Tailwind CSS        |
+| **Application & API** | Requests, login, alert rules and offline syncing                     | FastAPI, Firebase Auth, JWT         |
+| **AI & Intelligence** | Simplifying reports, answering questions, scoring risk and recovery  | Gemini API, LangChain, RAG, XGBoost |
+| **Data**              | Medical records, live updates, documents and offline storage         | PostgreSQL, Firebase, SQLite        |
+| **Integration**       | Government schemes now; hospital EMR and wearables later             | REST, Webhooks                      |
 
-> **Note:** Dashed edges (`-.->`) represent asynchronous or deferred paths — offline synchronisation, push alerts and roadmap integrations. Solid edges are synchronous request flows.
+> **Note:** Dotted lines in the diagram are background actions — offline syncing, alerts and planned integrations. Solid lines are direct requests.
 
 ---
 
@@ -435,44 +437,44 @@ This project is being developed during the **36-hour TetraTHON 2026 Hackathon**.
 
 ### Patients
 
-- Better recovery outcomes
-- Personalized guidance
-- Increased confidence after discharge
+- Recover better and faster
+- Get guidance made for their own condition
+- Feel confident after leaving the hospital
 
 ### Caregivers
 
-- Real-time recovery updates
-- Medication reminders
-- Emergency notifications
+- See recovery updates as they happen
+- Get medicine reminders
+- Get alerted in an emergency
 
 ### Doctors
 
-- Prioritized high-risk patient monitoring
-- Reduced manual follow-up workload
+- See their high-risk patients first
+- Spend less time on manual follow-ups
 
 ### Hospitals
 
-- Lower preventable readmissions
-- Improved patient satisfaction
-- Better resource utilization
+- Fewer patients coming back when it could be avoided
+- Happier patients
+- Better use of hospital resources
 
 ### Rural Communities
 
-- Offline healthcare access
+- Healthcare access even without internet
 - Support through ASHA workers and volunteers
-- Improved healthcare reach in remote regions
+- Care reaches remote villages
 
 ---
 
 # Future Roadmap
 
-- Wearable device integration
-- Real-time vitals streaming
-- Hospital EMR integration
-- Telemedicine support
-- AI-powered nutrition & rehabilitation planning
-- Government health record integration
-- Predictive disease progression analytics
+- Support for wearable devices
+- Live vitals monitoring
+- Connecting with hospital record systems
+- Online doctor consultations
+- AI-based diet and rehabilitation plans
+- Linking with government health records
+- Predicting how a disease may progress
 
 ---
 
@@ -489,7 +491,7 @@ Built with passion during **TetraTHON 2026**.
 
 # Acknowledgements
 
-This project is being built as part of **TetraTHON 2026**, an Indo-French AI Hackathon focused on solving real-world challenges through innovation, artificial intelligence, and technology.
+This project is being built as part of **TetraTHON 2026**, an Indo-French AI Hackathon for solving real-world problems using AI and technology.
 
 ---
 
