@@ -23,7 +23,23 @@ export default function LoginPage() {
         </div>
 
         <div className="relative flex h-full flex-col">
-          <BrandMark className="size-12 sm:size-14 rounded-2xl" />
+          <div className="flex items-center gap-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-2.5 pr-5 w-fit shadow-xl">
+            <span className="grid size-12 place-items-center rounded-xl bg-white p-1.5 shadow-md shrink-0">
+              <img
+                src="/logo.png"
+                alt="AURA CareLink Logo"
+                className="size-full object-contain"
+              />
+            </span>
+            <div>
+              <span className="font-display text-lg font-bold text-white tracking-tight block leading-none">
+                AURA CareLink
+              </span>
+              <span className="text-[10px] font-bold text-teal tracking-widest uppercase mt-1 block">
+                AI Care. Human Touch.
+              </span>
+            </div>
+          </div>
 
           <div className="mt-8 sm:mt-10 lg:mt-14">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal">

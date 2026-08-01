@@ -19,6 +19,11 @@ export const metadata = {
   title: "AURA CareLink | Intelligent Continuity of Care",
   description:
     "AI-powered continuity of care for patients after hospital discharge, built for rural and remote communities.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 // The root layout only sets up fonts and the page frame. The signed-in chrome

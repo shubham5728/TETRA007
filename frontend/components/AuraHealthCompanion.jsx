@@ -407,7 +407,9 @@ export default function AuraHealthCompanion() {
       {/* Top bar */}
       <div style={S.topBar}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={S.aiAvatar}>A</div>
+          <div style={{ ...S.aiAvatar, background: "#ffffff", border: "1px solid #e2e9f3", padding: 5, boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
+            <img src="/logo.png" alt="AURA" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
           <div>
             <p style={{ color: "#0b1b3a", fontWeight: 700, fontSize: 15, margin: 0 }}>AURA Health Companion</p>
             <p style={{ color: "#16a34a", fontSize: 12, fontWeight: 600, margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
