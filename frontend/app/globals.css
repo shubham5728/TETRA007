@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   AURA CareLink design tokens
+   Colours sampled from the product UI: light blue-white canvas,
+   deep navy feature panels, bright teal as the "live / vitals" accent.
+---------------------------------------------------------------- */
+@theme {
+  /* Surfaces */
+  --color-canvas: #eef3f9;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f6f9fd;
+  --color-line: #e2e9f3;
+
+  /* Text */
+  --color-ink: #0b1b3a;
+  --color-ink-soft: #4a5b76;
+  --color-ink-faint: #8394ad;
+
+  /* Brand */
+  --color-brand: #1665d8;
+  --color-brand-soft: #e8f0fe;
+  --color-navy: #0f2452;
+  --color-navy-deep: #091a3d;
+
+  /* Accents */
+  --color-teal: #17c9c0;
+  --color-teal-soft: #e6f9f7;
+  --color-mint: #e9f8f1;
+  --color-mint-ink: #0f7b52;
+
+  /* Risk levels */
+  --color-risk-low: #16a34a;
+  --color-risk-med: #d97706;
+  --color-risk-high: #dc2626;
+
+  /* Fonts wired up in app/layout.js */
+  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --animate-ecg: ecg 2.4s linear infinite;
+  --animate-pulse-glow: pulse-glow 2.6s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-rise: rise 0.5s ease-out both;
+}
+
+/* The ECG trace draws itself left to right, then repeats. */
+@keyframes ecg {
+  from {
+    stroke-dashoffset: 1200;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Slim scrollbars so the sidebar and long tables stay tidy. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c8d4e4 transparent;
+}
+
+/* Respect users who ask for less motion — the ECG and float loops stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
