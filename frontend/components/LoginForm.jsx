@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation";
 import { login, setViewingPatientId } from "@/lib/api";
 import { Icon } from "./Icons";
 
-// The destination comes back from the API, which is the authority
+const DEMO_PASSWORD = "AuraCare2025";
+
+// Prefill only. The destination comes back from the API, which is the authority
 // on what a role is allowed to open.
 const roles = [
-  { id: "patient", label: "Patient", icon: "heart" },
-  { id: "doctor", label: "Doctor", icon: "stethoscope" },
-  { id: "caregiver", label: "Caregiver", icon: "users" },
-  { id: "admin", label: "Hospital Admin", icon: "hospital" },
+  { id: "patient", label: "Patient", icon: "heart", email: "patient@auracarelink.com" },
+  { id: "doctor", label: "Doctor", icon: "stethoscope", email: "doctor@auracarelink.com" },
+  { id: "caregiver", label: "Caregiver", icon: "users", email: "caregiver@auracarelink.com" },
   {
     id: "gov",
     label: "Government Authority",
     icon: "bank",
+    email: "gov@auracarelink.com",
     wide: true,
   },
 ];
@@ -23,8 +25,8 @@ const roles = [
 export default function LoginForm() {
   const router = useRouter();
   const [roleId, setRoleId] = useState("patient");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(roles[0].email);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -32,6 +34,8 @@ export default function LoginForm() {
 
   function pickRole(role) {
     setRoleId(role.id);
+    setEmail(role.email); // keep the prefilled credentials in step with the role
+    setPassword(DEMO_PASSWORD);
     setError(null);
   }
 
@@ -56,7 +60,8 @@ export default function LoginForm() {
         Secure role-based login
       </h1>
       <p className="mt-2.5 text-sm leading-relaxed text-ink-soft">
-        Select a role to sign in to your secure workspace.
+        Select a role. Demo credentials are prefilled so every workspace can be
+        evaluated immediately.
       </p>
 
       <form onSubmit={submit} className="mt-7">
@@ -100,7 +105,6 @@ export default function LoginForm() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="username"
-                placeholder="Email address"
                 required
                 className="w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand disabled:opacity-60"
               />
@@ -115,7 +119,6 @@ export default function LoginForm() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
-                placeholder="Password"
                 required
                 className="w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-sm text-ink outline-none transition focus:border-brand disabled:opacity-60"
               />
@@ -148,6 +151,7 @@ export default function LoginForm() {
       </form>
 
       <p className="mt-6 text-center text-sm leading-relaxed text-ink-soft">
+        Demo password: <span className="font-semibold text-ink">{DEMO_PASSWORD}</span>.
         Sessions are encrypted and role-aware.
       </p>
     </div>

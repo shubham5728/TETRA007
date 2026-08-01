@@ -35,7 +35,7 @@ export default function LoginPage() {
             </h2>
 
             <p className="mt-6 max-w-sm text-base leading-relaxed text-white/70">
-              Protected access for patients, care teams, doctors, hospitals and
+              Protected access for patients, care teams, doctors, and
               government agencies.
             </p>
 

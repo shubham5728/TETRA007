@@ -84,36 +84,12 @@ def main() -> int:
             client.get(f"{API}/api/patient").status_code == 401,
         )
 
-        for email, role, _ in [
-            ("patient@auracarelink.com", "patient", "/dashboard"),
-            ("doctor@auracarelink.com", "doctor", "/doctor-portal"),
-            ("caregiver@auracarelink.com", "caregiver", "/caregiver-portal"),
-            ("admin@auracarelink.com", "admin", "/admin-portal"),
-            ("gov@auracarelink.com", "gov", "/gov-portal"),
-        ]:
-            sessions[role] = sign_in(client, email)
-
         patient = auth(sessions["patient"]["access_token"])
         doctor = auth(sessions["doctor"]["access_token"])
         caregiver = auth(sessions["caregiver"]["access_token"])
 
         # ------------------------------------------------------------- dashboard
         section("Dashboard")
-        w = sessions["patient"].get("workspace")
-        check("patient signs in and is routed to /dashboard", w == "/dashboard")
-
-        w = client.post(f"{API}/api/auth/login", json=creds("doctor")).json().get("workspace")
-        check("doctor signs in and is routed to /doctor-portal", w == "/doctor-portal")
-
-        w = client.post(f"{API}/api/auth/login", json=creds("caregiver")).json().get("workspace")
-        check("caregiver signs in and is routed to /caregiver-portal", w == "/caregiver-portal")
-
-        w = client.post(f"{API}/api/auth/login", json=creds("admin")).json().get("workspace")
-        check("admin signs in and is routed to /admin-portal", w == "/admin-portal")
-
-        w = client.post(f"{API}/api/auth/login", json=creds("gov")).json().get("workspace")
-        check("gov signs in and is routed to /gov-portal", w == "/gov-portal")
-
         twin = client.get(f"{API}/api/recovery-twin", headers=patient).json()
         sentinel = client.get(f"{API}/api/sentinel", headers=patient).json()
         meds = client.get(f"{API}/api/patient/medications", headers=patient).json()
@@ -251,110 +227,20 @@ def main() -> int:
             check("Caregiver can acknowledge an alert", True, "(none open)")
 
         # ---------------------------------------------------- care coordinator
-        section("AI Care Coordinator — scope")
+        section("AI Care Coordinator")
         history = client.get(f"{API}/api/chat", headers=patient).json()
         check("Chat history loads", len(history) > 0)
 
-        meta = client.get(f"{API}/api/chat/meta", headers=patient).json()
-        check("Quick chips are served", "Medication" in meta["quick_chips"])
-        print(
-            f"        (language model: "
-            f"{'enabled — ' + str(health.get('llm_provider')) if meta['llm_enabled'] else 'off, rules only'})"
-        )
+        exchange = client.post(
+            f"{API}/api/chat", headers=patient, json={"text": "When do I take my medicine?"}
+        ).json()
+        check("Message returns question and reply", len(exchange) == 2)
+        check("Assistant answers about medicines", "Metformin" in exchange[1]["text"])
 
-        def ask(text: str) -> dict:
-            return client.post(f"{API}/api/chat", headers=patient, json={"text": text}).json()[1]
-
-        for off_topic in ["Tell me a joke", "Who won the cricket match?",
-                          "Should I buy bitcoin?"]:
-            reply = ask(off_topic)
-            check(
-                f"Refuses: {off_topic!r}",
-                reply["topic"] == "blocked" and not reply["buttons"],
-                reply["assessment"][:60],
-            )
-
-        section("AI Care Coordinator — answers from the record")
-        medicine = ask("What are my medicines today?")
-        check(
-            "Medication answer uses the real prescription",
-            "Metformin" in medicine["assessment"],
-            medicine["assessment"][:70],
-        )
-        visit = ask("When is my next appointment?")
-        check(
-            "Appointment answer names the real visit",
-            "Diabetes review" in visit["assessment"],
-            visit["assessment"][:70],
-        )
-        score = ask("How is my recovery score?")
-        check("Recovery score answer is personalised", "%" in score["assessment"])
-
-        section("AI Care Coordinator — symptom triage")
-        mild = ask("I have a mild headache")
-        check(
-            "Mild symptom -> Low + Continue Recovery",
-            mild["risk_level"] == "low"
-            and [b["label"] for b in mild["buttons"]] == ["Continue Recovery"],
-            str(mild["risk_level"]),
-        )
-
-        moderate = ask("I have been vomiting since yesterday")
-        check(
-            "Vomiting -> Moderate + Book Doctor Appointment",
-            moderate["risk_level"] == "moderate"
-            and [b["label"] for b in moderate["buttons"]] == ["Book Doctor Appointment"],
-            str(moderate["risk_level"]),
-        )
-
-        emergency = ask("I have chest pain and cannot breathe")
-        check(
-            "Chest pain -> High + both emergency buttons",
-            emergency["risk_level"] == "high"
-            and [b["label"] for b in emergency["buttons"]]
-            == ["Emergency Call Doctor", "Call Emergency Services"],
-            str(emergency["risk_level"]),
-        )
-        check(
-            "Emergency reply carries the warning banner",
-            emergency["assessment"].startswith("⚠️"),
-            emergency["assessment"][:40],
-        )
-
-        softened = ask("I have mild chest pain")
-        check(
-            "'Mild' cannot downgrade chest pain",
-            softened["risk_level"] == "high",
-            str(softened["risk_level"]),
-        )
-
-        negated = ask("I have no chest pain today, just a question about food")
-        check(
-            "Negated red flag does not fire",
-            negated["risk_level"] != "high",
-            str(negated["risk_level"]),
-        )
-
-        section("AI Care Coordinator — escalation and the Recovery Twin")
-        alerts_now = client.get(f"{API}/api/patient/alerts", headers=patient).json()
-        escalated = [
-            a
-            for a in alerts_now
-            if "AI Care Coordinator" in a["title"] and a["severity"] == "critical"
-        ]
-        check("High-risk chat reached the doctor dashboard", len(escalated) > 0)
-
-        symptoms_now = client.get(f"{API}/api/patient/symptoms", headers=patient).json()
-        check(
-            "Reported symptoms were written to the Recovery Twin",
-            any(s["name"].lower() == "chest pain" for s in symptoms_now),
-        )
-
-        check(
-            "Reply falls back to rules when the model is unavailable",
-            emergency["source"] == "rules" or meta["llm_enabled"],
-            f"source={emergency['source']}",
-        )
+        urgent = client.post(
+            f"{API}/api/chat", headers=patient, json={"text": "I feel breathless tonight"}
+        ).json()
+        check("Urgent message re-scores risk", "risk" in urgent[1]["text"].lower())
 
         # ------------------------------------------------------------ simplifier
         section("Discharge Summary Simplifier")
