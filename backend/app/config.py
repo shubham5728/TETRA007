@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     # rule-based path, which is what runs today.
     gemini_api_key: str | None = None
 
+    # OpenAI powers the wording of Care Coordinator replies. It never decides
+    # risk level or which buttons appear — that stays with the triage rules in
+    # app/care/triage.py, so an outage or a bad completion cannot downgrade a
+    # medical emergency.
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_timeout_seconds: float = 15.0
+
     cors_origins: list[str] = ["*"]
 
 
