@@ -3,15 +3,35 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "@/lib/nav";
+import { useSession } from "@/lib/useApi";
 import { BrandMark, Icon } from "./Icons";
 
 export default function Sidebar({ onNavigate }) {
   const pathname = usePathname();
+  const { user } = useSession();
+
+  // If session is not ready yet, we can either render nothing or full list.
+  // We'll render filtered items if user exists, else empty.
+  const filteredNavItems = user
+    ? navItems.filter((item) => item.roles.includes(user.role))
+    : [];
+
+  // Where the brand logo redirects
+  const getWorkspace = (role) => {
+    switch (role) {
+      case "patient": return "/dashboard";
+      case "doctor": return "/doctor-portal";
+      case "caregiver": return "/caregiver-portal";
+      case "admin": return "/sentinel";
+      case "gov": return "/settings";
+      default: return "/dashboard";
+    }
+  };
 
   return (
     <div className="flex h-full flex-col gap-6 bg-surface px-5 py-6">
       <Link
-        href="/dashboard"
+        href={getWorkspace(user?.role)}
         onClick={onNavigate}
         className="flex items-center gap-3 rounded-xl px-1 py-1 transition hover:opacity-90"
       >
@@ -28,7 +48,7 @@ export default function Sidebar({ onNavigate }) {
 
         <nav aria-label="Main">
           <ul className="space-y-1">
-            {navItems.map((item) => {
+            {filteredNavItems.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
                 <li key={item.href}>
