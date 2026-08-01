@@ -4,7 +4,7 @@
 // client. Moving to httpOnly cookies later only changes this file.
 
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://tetra007.onrender.com";
 
 export const TOKEN_KEY = "aura.token";
 export const USER_KEY = "aura.user";
