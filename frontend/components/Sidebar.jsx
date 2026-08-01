@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { navItems } from "@/lib/nav";
 import { useSession } from "@/lib/useApi";
+import { clearSession } from "@/lib/api";
 import { BrandMark, Icon } from "./Icons";
 
 export default function Sidebar({ onNavigate }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { user } = useSession();
 
   const userRole = user?.role || "patient";
@@ -77,12 +79,27 @@ export default function Sidebar({ onNavigate }) {
         </nav>
       </div>
 
-      <div className="rounded-2xl border border-mint-ink/10 bg-mint p-4">
-        <p className="flex items-center gap-2 text-sm font-semibold text-mint-ink">
-          <Icon name="shield" className="size-4" />
-          Protected session
-        </p>
-        <p className="mt-1 text-xs text-mint-ink/75">Encrypted health workspace</p>
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-mint-ink/10 bg-mint p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-mint-ink">
+            <Icon name="shield" className="size-4" />
+            Protected session
+          </p>
+          <p className="mt-1 text-xs text-mint-ink/75">Encrypted health workspace</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (onNavigate) onNavigate();
+            clearSession();
+            router.replace("/login");
+          }}
+          className="flex w-full items-center gap-3 rounded-xl border border-line bg-surface-soft px-3 py-2.5 text-xs font-semibold text-ink-soft transition hover:bg-risk-high/10 hover:text-risk-high"
+        >
+          <Icon name="logout" className="size-4" />
+          Sign out session
+        </button>
       </div>
     </div>
   );

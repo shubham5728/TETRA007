@@ -103,7 +103,7 @@ export default function ChatPanel({ initialMessages, onReply }) {
 
   return (
     <div className="flex h-full flex-col">
-      <ul className="max-h-[420px] flex-1 space-y-4 overflow-y-auto pr-1">
+      <ul className="max-h-[50dvh] sm:max-h-[420px] flex-1 space-y-4 overflow-y-auto pr-1">
         {messages.map((message) => {
           const fromPatient = message.sender === "patient";
           return (
@@ -136,7 +136,7 @@ export default function ChatPanel({ initialMessages, onReply }) {
                               e.preventDefault();
                               sendWithText(btn.label);
                             }}
-                            className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand shadow-sm transition hover:bg-brand hover:text-white border border-brand/20"
+                            className="inline-flex min-h-[36px] items-center rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-brand shadow-sm transition hover:bg-brand hover:text-white border border-brand/20 active:scale-95"
                           >
                             {btn.label}
                           </button>

@@ -43,7 +43,7 @@ export default function Hero({ imageSrc }) {
               Immersive AURA Experience
             </p>
 
-            <h2 className="mt-4 max-w-lg font-display text-3xl font-bold leading-[1.15] sm:text-[2.6rem]">
+            <h2 className="mt-4 max-w-lg font-display text-2xl font-bold leading-[1.15] sm:text-3xl lg:text-[2.6rem]">
               Intelligence that follows every recovery journey.
             </h2>
 
@@ -64,7 +64,7 @@ export default function Hero({ imageSrc }) {
           </div>
 
           {/* ---- Illustration: floating chips, pulse core, live BPM, ECG ---- */}
-          <div className="relative mt-9 h-64 sm:h-60">
+          <div className="relative mt-9 h-56 sm:h-60">
             {/* Pulsing core */}
             <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 z-10">
               <span
@@ -72,38 +72,38 @@ export default function Hero({ imageSrc }) {
                 className="absolute inset-0 -m-6 rounded-full bg-teal/30 blur-2xl"
                 style={{ animation: "var(--animate-pulse-glow)" }}
               />
-              <span className="relative grid size-20 place-items-center rounded-full bg-teal/90 text-white ring-8 ring-teal/15">
-                <Icon name="brain" className="size-9" strokeWidth={1.6} />
+              <span className="relative grid size-16 sm:size-20 place-items-center rounded-full bg-teal/90 text-white ring-8 ring-teal/15">
+                <Icon name="brain" className="size-7 sm:size-9" strokeWidth={1.6} />
               </span>
             </div>
 
-            {/* Evenly Spaced Static Floating Elements */}
+            {/* Evenly Spaced Static Floating Elements (hidden outer chips on smallest screens) */}
             <FloatingChip icon="pill" className="left-[48%] top-[2%] -translate-x-1/2" delay="0s" />
-            <FloatingChip icon="file" className="left-[25%] top-[15%] -translate-x-1/2" delay="0.5s" />
-            <FloatingChip icon="users" className="left-[12%] top-[45%] -translate-x-1/2" delay="1s" />
+            <FloatingChip icon="file" className="left-[20%] sm:left-[25%] top-[15%] -translate-x-1/2" delay="0.5s" />
+            <FloatingChip icon="users" className="hidden sm:grid left-[12%] top-[45%] -translate-x-1/2" delay="1s" />
             <FloatingChip icon="stethoscope" className="left-[25%] top-[75%] -translate-x-1/2" delay="1.5s" />
             <FloatingChip icon="heart" className="left-[75%] top-[75%] -translate-x-1/2" delay="2s" />
-            <FloatingChip icon="chart" className="left-[88%] top-[45%] -translate-x-1/2" delay="2.5s" />
+            <FloatingChip icon="chart" className="hidden sm:grid left-[88%] top-[45%] -translate-x-1/2" delay="2.5s" />
 
             {/* Live BPM card text */}
             <div
-              className="absolute left-[75%] top-[15%] -translate-x-1/2 flex justify-center items-center"
+              className="absolute left-[80%] sm:left-[75%] top-[12%] sm:top-[15%] -translate-x-1/2 flex justify-center items-center"
               style={{
                 animation: "var(--animate-float)",
                 animationDelay: "3s",
               }}
             >
-              <div className="w-[86px] rounded-2xl bg-white p-3 text-center shadow-xl shadow-navy-deep/40">
-                <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink-faint">
+              <div className="w-[74px] sm:w-[86px] rounded-2xl bg-white p-2.5 sm:p-3 text-center shadow-xl shadow-navy-deep/40">
+                <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] text-ink-faint">
                   Live
                 </p>
-                <p className="font-display text-2xl font-bold leading-tight text-ink">72</p>
-                <p className="-mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-ink-faint">
+                <p className="font-display text-xl sm:text-2xl font-bold leading-tight text-ink">72</p>
+                <p className="-mt-0.5 text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider text-ink-faint">
                   bpm
                 </p>
                 <Icon
                   name="heart"
-                  className="mx-auto mt-1 size-4 text-risk-high"
+                  className="mx-auto mt-1 size-3.5 sm:size-4 text-risk-high"
                   strokeWidth={2}
                 />
               </div>

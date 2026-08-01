@@ -9,7 +9,7 @@ import AuraHealthCompanion from "@/components/AuraHealthCompanion";
  */
 export default function CareCoordinatorView() {
   return (
-    <div style={{ height: "calc(100vh - 80px)", minHeight: 600 }}>
+    <div className="h-[calc(100dvh-6rem)] sm:h-[calc(100dvh-8rem)] min-h-[480px] sm:min-h-[600px] w-full">
       <AuraHealthCompanion />
     </div>
   );

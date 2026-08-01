@@ -18,9 +18,9 @@ export default function AppShell({ children }) {
 
   return (
     <AuthGuard>
-      <div className="flex min-h-dvh">
-        {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-dvh w-[286px] shrink-0 border-r border-line lg:block">
+      <div className="flex h-dvh overflow-hidden bg-canvas">
+        {/* Desktop sidebar - FIXED FULL HEIGHT */}
+        <aside className="hidden h-full w-[286px] shrink-0 border-r border-line bg-surface lg:block">
           <Sidebar />
         </aside>
 
@@ -31,17 +31,25 @@ export default function AppShell({ children }) {
               type="button"
               aria-label="Close navigation menu"
               onClick={closeMenu}
-              className="absolute inset-0 bg-navy-deep/45 backdrop-blur-[2px]"
+              className="absolute inset-0 bg-navy-deep/50 backdrop-blur-[2px] cursor-default animate-fade-in"
             />
-            <div className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] border-r border-line shadow-2xl">
+            <div className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] border-r border-line shadow-2xl safe-bottom animate-slide-in-left">
               <Sidebar onNavigate={closeMenu} />
             </div>
           </div>
         ) : null}
 
-        <div className="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6 lg:p-8">
-          <Header onOpenMenu={() => setMenuOpen(true)} />
-          <main className="flex-1 pb-4">{children}</main>
+        {/* Right workspace area - FIXED 100dvh CONTAINER */}
+        <div className="flex flex-1 flex-col h-full min-w-0 overflow-hidden">
+          {/* Header - Fixed top area, NEVER scrolls */}
+          <div className="shrink-0 p-4 pb-0 sm:p-6 sm:pb-0 lg:p-8 lg:pb-0">
+            <Header onOpenMenu={() => setMenuOpen(true)} />
+          </div>
+
+          {/* Main workspace content - ONLY THIS CONTAINER SCROLLS */}
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 safe-bottom">
+            {children}
+          </main>
         </div>
       </div>
     </AuthGuard>

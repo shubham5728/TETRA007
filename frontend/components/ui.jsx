@@ -32,14 +32,14 @@ export function Eyebrow({ children, tone = "teal", className = "" }) {
 export function CardTitle({ eyebrow, title, hint, action }) {
   return (
     <header className="mb-5 flex items-start justify-between gap-4">
-      <div>
+      <div className="min-w-0 flex-1">
         {eyebrow ? <Eyebrow className="mb-1.5">{eyebrow}</Eyebrow> : null}
         <h2 className="font-display text-lg font-semibold text-ink sm:text-xl">
           {title}
         </h2>
         {hint ? <p className="mt-1 text-sm text-ink-soft">{hint}</p> : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </header>
   );
 }
@@ -94,7 +94,7 @@ export function StatTile({ label, value, unit, change, icon, tone = "plain" }) {
         {icon ? <Icon name={icon} className="size-4" /> : null}
         <p className="text-xs font-medium">{label}</p>
       </div>
-      <p className="mt-2 font-display text-2xl font-semibold text-ink">
+      <p className="mt-2 font-display text-xl sm:text-2xl font-semibold text-ink">
         {value}
         {unit ? (
           <span className="ml-1 text-sm font-medium text-ink-faint">{unit}</span>

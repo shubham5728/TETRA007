@@ -41,7 +41,7 @@ export default function Header({ onOpenMenu }) {
   }
 
   return (
-    <header className="rounded-3xl border border-line bg-surface px-5 py-4 shadow-[0_1px_2px_rgba(11,27,58,0.04)] sm:px-7 sm:py-5">
+    <header className="rounded-3xl border border-line bg-surface px-5 py-4 shadow-sm sm:px-7 sm:py-5">
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <button
@@ -79,10 +79,12 @@ export default function Header({ onOpenMenu }) {
           <button
             type="button"
             onClick={signOut}
-            className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-surface-soft hover:text-ink sm:inline-flex"
+            title="Sign out"
+            aria-label="Sign out"
+            className="flex items-center gap-2 rounded-xl border border-line p-2.5 text-sm font-medium text-ink-soft transition hover:bg-surface-soft hover:text-ink sm:border-transparent sm:px-3 sm:py-2"
           >
             <Icon name="logout" className="size-4" />
-            Sign out
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </div>
