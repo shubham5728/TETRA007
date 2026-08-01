@@ -103,6 +103,9 @@ async function request(path, { method = "GET", body, auth = true, params } = {})
 
   if (response.status === 401) {
     clearSession();
+    if (path === "/api/auth/login") {
+      throw new ApiError("Incorrect email or password.", 401);
+    }
     throw new ApiError("Your session has expired. Please sign in again.", 401);
   }
 

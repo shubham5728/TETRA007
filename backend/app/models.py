@@ -171,6 +171,16 @@ class ChatMessage(Base):
     translated: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
+    # Structured assistant reply. Stored so reopening the chat renders exactly
+    # what the patient saw, buttons included.
+    assessment: Mapped[str | None] = mapped_column(Text)
+    recommended_action: Mapped[str | None] = mapped_column(Text)
+    recovery_advice: Mapped[str | None] = mapped_column(Text)
+    risk_level: Mapped[str | None] = mapped_column(String(10))  # low|moderate|high
+    topic: Mapped[str | None] = mapped_column(String(20))
+    buttons_json: Mapped[str | None] = mapped_column(Text)
+    source: Mapped[str | None] = mapped_column(String(10))  # rules | openai
+
     patient: Mapped["Patient"] = relationship(back_populates="messages")
 
 
