@@ -28,36 +28,36 @@ function FloatingChip({ icon, className = "", delay = "0s" }) {
  */
 export default function Hero({ imageSrc }) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-line bg-navy shadow-[0_20px_50px_-30px_rgba(9,26,61,0.7)]">
+    <section className="overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface via-surface-soft to-brand-soft/30 shadow-sm">
       <div className="grid lg:grid-cols-[1.32fr_1fr]">
         {/* ---------------- Left: message + live illustration ---------------- */}
-        <div className="relative px-6 py-8 text-white sm:px-9 sm:py-10">
+        <div className="relative px-6 py-8 text-ink sm:px-9 sm:py-10">
           {/* Soft light bloom behind the copy */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-brand/25 blur-3xl"
+            className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-brand/10 blur-3xl"
           />
 
           <div className="relative">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand">
               Immersive AURA Experience
             </p>
 
-            <h2 className="mt-4 max-w-lg font-display text-2xl font-bold leading-[1.15] sm:text-3xl lg:text-[2.6rem]">
+            <h2 className="mt-4 max-w-lg font-display text-2xl font-bold leading-[1.15] text-ink sm:text-3xl lg:text-[2.6rem]">
               Intelligence that follows every recovery journey.
             </h2>
 
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70 sm:text-base">
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-ink-soft sm:text-base">
               Live ECG, wearable signals and Sentinel insight work together in a
               secure healthcare operating system.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-2.5">
-              <Pill tone="onDark">24/7 monitoring</Pill>
-              <Pill tone="onDark">Wearable-informed</Pill>
-              <Pill tone="onDark">Care-team ready</Pill>
-              <Pill tone="onDark" className="border-white/15 bg-white/10 gap-2">
-                <Icon name="hospital" className="size-3" />
+              <Pill tone="neutral">24/7 monitoring</Pill>
+              <Pill tone="neutral">Wearable-informed</Pill>
+              <Pill tone="neutral">Care-team ready</Pill>
+              <Pill tone="neutral" className="border-line bg-surface gap-2">
+                <Icon name="hospital" className="size-3 text-brand" />
                 Hospital connected
               </Pill>
             </div>
@@ -69,10 +69,10 @@ export default function Hero({ imageSrc }) {
             <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 z-10">
               <span
                 aria-hidden="true"
-                className="absolute inset-0 -m-6 rounded-full bg-teal/30 blur-2xl"
+                className="absolute inset-0 -m-6 rounded-full bg-brand/20 blur-2xl"
                 style={{ animation: "var(--animate-pulse-glow)" }}
               />
-              <span className="relative grid size-16 sm:size-20 place-items-center rounded-full bg-teal/90 text-white ring-8 ring-teal/15">
+              <span className="relative grid size-16 sm:size-20 place-items-center rounded-full bg-brand text-white ring-8 ring-brand/15 shadow-lg">
                 <Icon name="brain" className="size-7 sm:size-9" strokeWidth={1.6} />
               </span>
             </div>
@@ -93,7 +93,7 @@ export default function Hero({ imageSrc }) {
                 animationDelay: "3s",
               }}
             >
-              <div className="w-[74px] sm:w-[86px] rounded-2xl bg-white p-2.5 sm:p-3 text-center shadow-xl shadow-navy-deep/40">
+              <div className="w-[74px] sm:w-[86px] rounded-2xl bg-white p-2.5 sm:p-3 text-center shadow-lg border border-line">
                 <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] text-ink-faint">
                   Live
                 </p>
@@ -110,7 +110,7 @@ export default function Hero({ imageSrc }) {
             </div>
 
             {/* ECG trace along the bottom */}
-            <EcgLine className="absolute inset-x-0 bottom-0 h-16 w-full" />
+            <EcgLine className="absolute inset-x-0 bottom-0 h-16 w-full opacity-60" />
           </div>
         </div>
 
@@ -128,18 +128,18 @@ export default function Hero({ imageSrc }) {
           ) : (
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-br from-[#123a6b] via-[#12608f] to-[#14b3ac]"
+              className="absolute inset-0 bg-gradient-to-br from-brand-soft via-surface to-brand/10"
             >
-              <div className="absolute -right-10 top-8 size-56 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute bottom-16 left-4 size-40 rounded-full bg-teal/30 blur-2xl" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.18),transparent_55%)]" />
+              <div className="absolute -right-10 top-8 size-56 rounded-full bg-brand/10 blur-2xl" />
+              <div className="absolute bottom-16 left-4 size-40 rounded-full bg-teal/20 blur-2xl" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(22,101,216,0.08),transparent_55%)]" />
             </div>
           )}
 
           {/* Caption card */}
-          <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-navy-deep/80 px-4 py-3 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6">
-            <p className="font-display text-sm font-semibold">Connected recovery care</p>
-            <p className="mt-0.5 text-xs text-white/70">
+          <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-line bg-surface/90 px-4 py-3 text-ink backdrop-blur-md shadow-sm sm:inset-x-6 sm:bottom-6">
+            <p className="font-display text-sm font-bold text-ink">Connected recovery care</p>
+            <p className="mt-0.5 text-xs text-ink-soft">
               Doctor, patient and care team aligned
             </p>
           </div>

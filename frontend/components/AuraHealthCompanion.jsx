@@ -60,8 +60,8 @@ function LanguagePicker({ onSelect }) {
           {LANGUAGES.map((l) => (
             <button key={l.code} style={S.langCard} onClick={() => onSelect(l)}>
               <span style={{ fontSize: 34 }}>{l.flag}</span>
-              <strong style={{ color: "#fff", fontSize: 17 }}>{l.native}</strong>
-              <span style={{ color: "#aaa", fontSize: 13 }}>{l.label}</span>
+              <strong style={{ color: "#0b1b3a", fontSize: 17, fontWeight: 700 }}>{l.native}</strong>
+              <span style={{ color: "#4a5b76", fontSize: 13, fontWeight: 600 }}>{l.label}</span>
             </button>
           ))}
         </div>
@@ -119,7 +119,7 @@ function Bubble({ msg, onSpeak, onSend }) {
       {!isMe && <div style={S.aiAvatar}>A</div>}
       <div style={{ maxWidth: "78%" }}>
         <div style={{ ...S.bubble, ...(isMe ? S.meBubble : S.aiBubble) }}>
-          <p style={S.msgText}>{msg.text}</p>
+          <p style={{ ...S.msgText, color: isMe ? "#ffffff" : "#0b1b3a" }}>{msg.text}</p>
           {!isMe && (
             <button style={S.ttsBtn} onClick={() => onSpeak(msg.text)} title="Speak">🔊</button>
           )}
@@ -161,15 +161,15 @@ function SubscriptionModal({ onClose }) {
 
   return (
     <div style={{...S.screen, zIndex: 1000}}>
-      <div style={{...S.langBox, background: "rgba(15,23,42,0.95)"}}>
+      <div style={{...S.langBox, background: "#ffffff"}}>
         {step === "offer" && (
           <>
-            <h2 style={{ color: "#fff", marginBottom: 12 }}>Credits Exhausted</h2>
-            <p style={{ color: "#fca5a5", fontSize: 14, marginBottom: 20 }}>You have used all your available AI Health Companion credits.</p>
-            <div style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 16, padding: 20, marginBottom: 20 }}>
-              <h3 style={{ color: "#93c5fd", margin: "0 0 8px" }}>AURA Basic Plan</h3>
-              <p style={{ fontSize: 24, fontWeight: 800, color: "#fff", margin: "0 0 8px" }}>₹49 <span style={{fontSize: 14, fontWeight: 400, color: "#aaa"}}>/ 30 Days</span></p>
-              <ul style={{ color: "#ccc", fontSize: 14, textAlign: "left", margin: "0 0 16px", paddingLeft: 20 }}>
+            <h2 style={{ color: "#0b1b3a", fontWeight: 700, marginBottom: 12 }}>Credits Exhausted</h2>
+            <p style={{ color: "#dc2626", fontSize: 14, fontWeight: 600, marginBottom: 20 }}>You have used all your available AI Health Companion credits.</p>
+            <div style={{ background: "#f6f9fd", border: "1px solid #e2e9f3", borderRadius: 16, padding: 20, marginBottom: 20 }}>
+              <h3 style={{ color: "#1665d8", fontWeight: 700, margin: "0 0 8px" }}>AURA Basic Plan</h3>
+              <p style={{ fontSize: 24, fontWeight: 800, color: "#0b1b3a", margin: "0 0 8px" }}>₹49 <span style={{fontSize: 14, fontWeight: 600, color: "#4a5b76"}}>/ 30 Days</span></p>
+              <ul style={{ color: "#4a5b76", fontWeight: 600, fontSize: 14, textAlign: "left", margin: "0 0 16px", paddingLeft: 20 }}>
                 <li style={{marginBottom: 8}}>✓ 25 AI Chat Credits</li>
                 <li style={{marginBottom: 8}}>✓ Report Analysis</li>
                 <li style={{marginBottom: 8}}>✓ Medicine Explanation</li>
@@ -182,14 +182,14 @@ function SubscriptionModal({ onClose }) {
         )}
         {step === "payment" && (
           <>
-            <h2 style={{ color: "#fff", marginBottom: 12 }}>Complete Payment</h2>
-            <p style={{ color: "#aaa", fontSize: 14, marginBottom: 20 }}>Pay ₹49 via UPI</p>
+            <h2 style={{ color: "#0b1b3a", fontWeight: 700, marginBottom: 12 }}>Complete Payment</h2>
+            <p style={{ color: "#4a5b76", fontSize: 14, fontWeight: 600, marginBottom: 20 }}>Pay ₹49 via UPI</p>
             
-            <div style={{ background: "#fff", padding: 10, display: "inline-block", borderRadius: 8, marginBottom: 16 }}>
+            <div style={{ background: "#f6f9fd", border: "1px solid #e2e9f3", padding: 10, display: "inline-block", borderRadius: 8, marginBottom: 16 }}>
               <div style={{ width: 150, height: 150, background: `url("https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=amrmeetdesai02432@oksbi&pn=Aura&am=49") center/cover` }} />
             </div>
             
-            <p style={{ color: "#fff", fontSize: 15, fontWeight: 700, margin: "0 0 20px" }}>
+            <p style={{ color: "#0b1b3a", fontSize: 15, fontWeight: 700, margin: "0 0 20px" }}>
               UPI ID: amrmeetdesai02432@oksbi
               <button style={{...S.chipBtn, marginLeft: 10}} onClick={() => navigator.clipboard.writeText("amrmeetdesai02432@oksbi")}>Copy</button>
             </p>
@@ -204,8 +204,8 @@ function SubscriptionModal({ onClose }) {
         {step === "done" && (
           <>
             <div style={{ fontSize: 40, margin: "0 0 16px" }}>⏳</div>
-            <h2 style={{ color: "#fff", marginBottom: 12 }}>Pending Verification</h2>
-            <p style={{ color: "#aaa", fontSize: 14, marginBottom: 20 }}>Your payment request has been submitted to the admin. 25 credits will be added once verified.</p>
+            <h2 style={{ color: "#0b1b3a", fontWeight: 700, marginBottom: 12 }}>Pending Verification</h2>
+            <p style={{ color: "#4a5b76", fontSize: 14, fontWeight: 600, marginBottom: 20 }}>Your payment request has been submitted to the admin. 25 credits will be added once verified.</p>
             <button style={{...S.btnPrimary, width: "100%"}} onClick={onClose}>Close</button>
           </>
         )}
@@ -409,16 +409,16 @@ export default function AuraHealthCompanion() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={S.aiAvatar}>A</div>
           <div>
-            <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: 0 }}>AURA Health Companion</p>
-            <p style={{ color: "#22c55e", fontSize: 12, margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+            <p style={{ color: "#0b1b3a", fontWeight: 700, fontSize: 15, margin: 0 }}>AURA Health Companion</p>
+            <p style={{ color: "#16a34a", fontSize: 12, fontWeight: 600, margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
               Online · {lang.native}
             </p>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {credits !== null && (
-            <div title="Credits Remaining" style={{...S.chipBtn, background: credits > 0 ? "rgba(59,130,246,0.2)" : "rgba(239,68,68,0.2)", color: credits > 0 ? "#93c5fd" : "#fca5a5", border: "1px solid rgba(59,130,246,0.3)", display: "flex", gap: 5, alignItems: "center", cursor: "default"}}>
+            <div title="Credits Remaining" style={{...S.chipBtn, background: credits > 0 ? "#e8f0fe" : "#fef2f2", color: credits > 0 ? "#1665d8" : "#dc2626", border: credits > 0 ? "1px solid #1665d8" : "1px solid #fca5a5", display: "flex", gap: 5, alignItems: "center", cursor: "default"}}>
               <span style={{ fontSize: 13 }}>💎</span> {credits}
             </div>
           )}
@@ -428,9 +428,9 @@ export default function AuraHealthCompanion() {
           <button
             style={{
               ...S.chipBtn,
-              background: voiceOn ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.07)",
-              border: voiceOn ? "1px solid rgba(34,197,94,0.5)" : "1px solid rgba(255,255,255,0.12)",
-              color: voiceOn ? "#86efac" : "rgba(255,255,255,0.75)",
+              background: voiceOn ? "#e9f8f1" : "#ffffff",
+              border: voiceOn ? "1px solid #0f7b52" : "1px solid #e2e9f3",
+              color: voiceOn ? "#0f7b52" : "#0b1b3a",
               fontWeight: 700,
             }}
             onClick={() => {
@@ -467,8 +467,8 @@ export default function AuraHealthCompanion() {
                 }}
               >
                 <span style={{ fontSize: 28 }}>{c.emoji}</span>
-                <p style={{ color: "#fff", fontWeight: 700, fontSize: 13, margin: "6px 0 2px" }}>{c.title}</p>
-                <p style={{ color: "#aaa", fontSize: 11, margin: 0 }}>{c.sub}</p>
+                <p style={{ color: "#0b1b3a", fontWeight: 700, fontSize: 13, margin: "6px 0 2px" }}>{c.title}</p>
+                <p style={{ color: "#4a5b76", fontSize: 11, fontWeight: 500, margin: 0 }}>{c.sub}</p>
               </button>
             ))}
           </div>
@@ -478,9 +478,9 @@ export default function AuraHealthCompanion() {
         <div style={S.chat}>
           <div style={S.messages}>
             {msgs.length === 0 && !busy && (
-              <div style={{ textAlign: "center", color: "#666", marginTop: 40 }}>
+              <div style={{ textAlign: "center", color: "#4a5b76", marginTop: 40 }}>
                 <div style={{ ...S.aiAvatar, margin: "0 auto 10px", opacity: 0.5 }}>A</div>
-                <p style={{ fontSize: 14 }}>AURA is ready to help…</p>
+                <p style={{ fontSize: 14, fontWeight: 600 }}>AURA is ready to help…</p>
               </div>
             )}
             {msgs.map((m) => <Bubble key={m.id} msg={m} onSpeak={speak} onSend={sendText} />)}
@@ -521,7 +521,7 @@ export default function AuraHealthCompanion() {
               spellCheck="false"
             />
             <button
-              style={{ ...S.iconBtn, background: listening ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.07)", border: listening ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(255,255,255,0.12)" }}
+              style={{ ...S.iconBtn, background: listening ? "rgba(239,68,68,0.15)" : "#ffffff", border: listening ? "1px solid rgba(239,68,68,0.5)" : "1px solid #e2e9f3" }}
               onClick={toggleMic}
               disabled={busy}
               title={listening ? "Stop listening" : "Speak"}
@@ -529,7 +529,7 @@ export default function AuraHealthCompanion() {
               {listening ? "🔴" : "🎤"}
             </button>
             <button
-              style={{ ...S.iconBtn, background: "linear-gradient(135deg,#6366f1,#0ea5e9)", opacity: !draft.trim() || busy ? 0.4 : 1 }}
+              style={{ ...S.iconBtn, background: "linear-gradient(135deg,#1665d8,#0ea5e9)", color: "#ffffff", border: "none", opacity: !draft.trim() || busy ? 0.4 : 1 }}
               onClick={() => sendText()}
               disabled={!draft.trim() || busy}
             >
@@ -557,39 +557,39 @@ function ReportsScreen({ onBack, lang }) {
   }, []);
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "24px 16px" }}>
+    <div style={{ flex: 1, overflowY: "auto", padding: "24px 16px", background: "#ffffff" }}>
       <button style={{ ...S.chipBtn, marginBottom: 20 }} onClick={onBack}>← Back to Home</button>
-      <h2 style={{ color: "#fff", fontSize: 20, marginBottom: 16 }}>My Medical Reports</h2>
+      <h2 style={{ color: "#0b1b3a", fontSize: 20, marginBottom: 16 }}>My Medical Reports</h2>
       
-      {loading && <p style={{ color: "#aaa" }}>Loading reports...</p>}
-      {err && <p style={{ color: "#f87171" }}>{err}</p>}
+      {loading && <p style={{ color: "#4a5b76" }}>Loading reports...</p>}
+      {err && <p style={{ color: "#dc2626" }}>{err}</p>}
       
       {!loading && reports.length === 0 && (
-        <p style={{ color: "#aaa", textAlign: "center", marginTop: 40 }}>No reports analyzed yet.</p>
+        <p style={{ color: "#4a5b76", textAlign: "center", marginTop: 40 }}>No reports analyzed yet.</p>
       )}
 
       {!loading && reports.map(r => (
-        <div key={r.id} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 16, marginBottom: 16 }}>
-          <p style={{ color: "#818cf8", fontSize: 12, fontWeight: 700, margin: "0 0 4px" }}>
+        <div key={r.id} style={{ background: "#f6f9fd", border: "1px solid #e2e9f3", borderRadius: 16, padding: 16, marginBottom: 16 }}>
+          <p style={{ color: "#1665d8", fontSize: 12, fontWeight: 700, margin: "0 0 4px" }}>
             {new Date(r.uploaded_at).toLocaleDateString()} · {r.filename}
           </p>
-          <p style={{ color: "#fff", fontSize: 14, margin: "0 0 12px" }}>
-            <strong>Risk Level:</strong> <span style={{ color: r.risk_level === "High" ? "#f87171" : r.risk_level === "Moderate" ? "#fbbf24" : "#4ade80" }}>{r.risk_level}</span>
+          <p style={{ color: "#0b1b3a", fontSize: 14, margin: "0 0 12px" }}>
+            <strong>Risk Level:</strong> <span style={{ color: r.risk_level === "High" ? "#dc2626" : r.risk_level === "Moderate" ? "#d97706" : "#16a34a" }}>{r.risk_level}</span>
           </p>
           {r.recommended_specialist && (
-            <p style={{ color: "#aaa", fontSize: 13, margin: "0 0 12px" }}>
+            <p style={{ color: "#4a5b76", fontSize: 13, margin: "0 0 12px" }}>
               <strong>Recommended Specialist:</strong> {r.recommended_specialist}
             </p>
           )}
           
-          <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 12, marginBottom: 12 }}>
-            <strong style={{ color: "#fff", fontSize: 13 }}>Smart Summary</strong>
-            <p style={{ color: "#ccc", fontSize: 13, margin: "4px 0 0", whiteSpace: "pre-wrap" }}>{r.smart_summary}</p>
+          <div style={{ background: "#ffffff", border: "1px solid #e2e9f3", borderRadius: 12, padding: 12, marginBottom: 12 }}>
+            <strong style={{ color: "#0b1b3a", fontSize: 13 }}>Smart Summary</strong>
+            <p style={{ color: "#4a5b76", fontSize: 13, margin: "4px 0 0", whiteSpace: "pre-wrap" }}>{r.smart_summary}</p>
           </div>
           
-          <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 12 }}>
-            <strong style={{ color: "#fff", fontSize: 13 }}>Explanation</strong>
-            <p style={{ color: "#ccc", fontSize: 13, margin: "4px 0 0", whiteSpace: "pre-wrap" }}>{r.simple_explanation}</p>
+          <div style={{ background: "#ffffff", border: "1px solid #e2e9f3", borderRadius: 12, padding: 12 }}>
+            <strong style={{ color: "#0b1b3a", fontSize: 13 }}>Explanation</strong>
+            <p style={{ color: "#4a5b76", fontSize: 13, margin: "4px 0 0", whiteSpace: "pre-wrap" }}>{r.simple_explanation}</p>
           </div>
         </div>
       ))}
@@ -599,44 +599,44 @@ function ReportsScreen({ onBack, lang }) {
 
 // ─── Styles ────────────────────────────────────────────────────────────────────
 const S = {
-  screen: { position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#0f0c29,#141e30,#243b55)", padding: 20 },
-  langBox: { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 24, padding: 40, maxWidth: 480, width: "100%", textAlign: "center", backdropFilter: "blur(12px)" },
-  auraLabel: { fontSize: 13, fontWeight: 800, letterSpacing: 4, color: "#818cf8", margin: "0 0 12px" },
-  langTitle: { fontSize: 28, fontWeight: 800, color: "#fff", margin: "0 0 6px" },
-  langSub: { fontSize: 14, color: "#888", margin: "0 0 28px" },
+  screen: { position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(11,27,58,0.5)", padding: 20, backdropFilter: "blur(8px)" },
+  langBox: { background: "#ffffff", border: "1px solid #e2e9f3", borderRadius: 24, padding: 40, maxWidth: 480, width: "100%", textAlign: "center", boxShadow: "0 20px 40px rgba(11,27,58,0.12)" },
+  auraLabel: { fontSize: 13, fontWeight: 800, letterSpacing: 4, color: "#1665d8", margin: "0 0 12px" },
+  langTitle: { fontSize: 28, fontWeight: 800, color: "#0b1b3a", margin: "0 0 6px" },
+  langSub: { fontSize: 14, color: "#4a5b76", margin: "0 0 28px" },
   langGrid: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 },
-  langCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 18, padding: "20px 10px", cursor: "pointer", transition: "all 0.2s" },
-  introAvatar: { width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 800, color: "#fff", margin: "0 auto 24px" },
-  typewriter: { fontFamily: "inherit", fontSize: 17, lineHeight: 1.7, color: "rgba(255,255,255,0.9)", whiteSpace: "pre-wrap", textAlign: "left", minHeight: 140, margin: 0 },
-  cursor: { display: "inline-block", color: "#6366f1", animation: "none" },
-  btnPrimary: { background: "linear-gradient(135deg,#6366f1,#0ea5e9)", color: "#fff", border: "none", borderRadius: 14, padding: "13px 28px", fontSize: 16, fontWeight: 700, cursor: "pointer" },
-  btnGhost: { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", borderRadius: 14, padding: "13px 28px", fontSize: 15, cursor: "pointer" },
+  langCard: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "#f6f9fd", border: "1px solid #e2e9f3", borderRadius: 18, padding: "20px 10px", cursor: "pointer", transition: "all 0.2s" },
+  introAvatar: { width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg,#1665d8,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 800, color: "#fff", margin: "0 auto 24px" },
+  typewriter: { fontFamily: "inherit", fontSize: 17, lineHeight: 1.7, color: "#0b1b3a", whiteSpace: "pre-wrap", textAlign: "left", minHeight: 140, margin: 0 },
+  cursor: { display: "inline-block", color: "#1665d8", animation: "none" },
+  btnPrimary: { background: "linear-gradient(135deg,#1665d8,#0ea5e9)", color: "#fff", border: "none", borderRadius: 14, padding: "13px 28px", fontSize: 16, fontWeight: 700, cursor: "pointer" },
+  btnGhost: { background: "#f6f9fd", border: "1px solid #e2e9f3", color: "#4a5b76", borderRadius: 14, padding: "13px 28px", fontSize: 15, cursor: "pointer" },
 
-  wrap: { display: "flex", flexDirection: "column", height: "100%", minHeight: 580, background: "linear-gradient(160deg,#0d1117,#1a1f35)", borderRadius: 20, overflow: "hidden", fontFamily: "'Inter',system-ui,sans-serif" },
+  wrap: { display: "flex", flexDirection: "column", height: "100%", minHeight: 580, background: "#ffffff", border: "1px solid #e2e9f3", borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 20px rgba(11,27,58,0.04)", fontFamily: "'Inter',system-ui,sans-serif" },
 
-  topBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 },
-  aiAvatar: { width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800, color: "#fff", flexShrink: 0 },
-  chipBtn: { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 100, padding: "5px 12px", color: "rgba(255,255,255,0.75)", fontSize: 12, cursor: "pointer" },
+  topBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "#f6f9fd", borderBottom: "1px solid #e2e9f3", flexShrink: 0 },
+  aiAvatar: { width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#1665d8,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800, color: "#fff", flexShrink: 0 },
+  chipBtn: { background: "#ffffff", border: "1px solid #e2e9f3", borderRadius: 100, padding: "5px 12px", color: "#4a5b76", fontSize: 12, cursor: "pointer" },
 
-  home: { flex: 1, overflowY: "auto", padding: "24px 16px" },
-  greeting: { fontSize: 18, color: "#fff", textAlign: "center", marginBottom: 24, fontWeight: 400 },
+  home: { flex: 1, overflowY: "auto", padding: "24px 16px", background: "#ffffff" },
+  greeting: { fontSize: 18, color: "#0b1b3a", textAlign: "center", marginBottom: 24, fontWeight: 500 },
   cardGrid: { display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12 },
-  card: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 18, padding: "18px 14px", cursor: "pointer", transition: "all 0.2s", textAlign: "left" },
-  cardRed: { borderColor: "rgba(239,68,68,0.25)", background: "rgba(239,68,68,0.06)" },
+  card: { display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0, background: "#f6f9fd", border: "1px solid #e2e9f3", borderRadius: 18, padding: "18px 14px", cursor: "pointer", transition: "all 0.2s", textAlign: "left" },
+  cardRed: { borderColor: "#fca5a5", background: "#fef2f2" },
 
-  chat: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" },
+  chat: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "#ffffff" },
   messages: { flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 },
   msgRow: { display: "flex", gap: 8, alignItems: "flex-end" },
   bubble: { borderRadius: 18, padding: "10px 14px", position: "relative", maxWidth: "100%", wordBreak: "break-word" },
-  aiBubble: { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "18px 18px 18px 4px" },
-  meBubble: { background: "linear-gradient(135deg,#4f46e5,#6366f1)", borderRadius: "18px 18px 4px 18px" },
-  msgText: { fontSize: 14, color: "#fff", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" },
-  ttsBtn: { marginTop: 4, background: "none", border: "none", cursor: "pointer", fontSize: 13, opacity: 0.6, padding: 0, display: "block" },
+  aiBubble: { background: "#f6f9fd", border: "1px solid #e2e9f3", borderRadius: "18px 18px 18px 4px" },
+  meBubble: { background: "linear-gradient(135deg,#1665d8,#0ea5e9)", borderRadius: "18px 18px 4px 18px" },
+  msgText: { fontSize: 14, color: "#0b1b3a", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" },
+  ttsBtn: { marginTop: 4, background: "none", border: "none", cursor: "pointer", fontSize: 13, opacity: 0.7, padding: 0, display: "block" },
   btnRow: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 },
-  quickBtn: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 100, padding: "6px 14px", fontSize: 12, fontWeight: 600, color: "#fff", cursor: "pointer" },
-  dot: { width: 7, height: 7, borderRadius: "50%", background: "rgba(255,255,255,0.45)", display: "inline-block", animation: "bounce 1.2s ease-in-out infinite" },
+  quickBtn: { background: "#e8f0fe", border: "1px solid #1665d8", borderRadius: 100, padding: "6px 14px", fontSize: 12, fontWeight: 600, color: "#1665d8", cursor: "pointer" },
+  dot: { width: 7, height: 7, borderRadius: "50%", background: "#4a5b76", display: "inline-block", animation: "bounce 1.2s ease-in-out infinite" },
 
-  inputRow: { display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderTop: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 },
-  iconBtn: { width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  textInput: { flex: 1, minWidth: 0, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 100, padding: "9px 16px", fontSize: 14, color: "#fff", outline: "none" },
+  inputRow: { display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", background: "#f6f9fd", borderTop: "1px solid #e2e9f3", flexShrink: 0 },
+  iconBtn: { width: 36, height: 36, borderRadius: "50%", background: "#ffffff", border: "1px solid #e2e9f3", fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  textInput: { flex: 1, minWidth: 0, background: "#ffffff", border: "1px solid #e2e9f3", borderRadius: 100, padding: "9px 16px", fontSize: 14, color: "#0b1b3a", outline: "none" },
 };
