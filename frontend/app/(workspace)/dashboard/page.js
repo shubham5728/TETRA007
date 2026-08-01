@@ -30,7 +30,7 @@ export default function DashboardPage() {
     <div className="space-y-5">
       {/* Drop a photo at /public/images/hero-care.jpg and pass it here to
           replace the gradient panel: <Hero imageSrc="/images/hero-care.jpg" /> */}
-      <Hero />
+      <Hero imageSrc="/images/hero-care.png" />
 
       {/* ---------------- Live Recovery Twin ---------------- */}
       <Card>
