@@ -19,6 +19,12 @@ _Predictive Readmission & Early Relapse Intelligence_
 
 _No patient should be forgotten after leaving the hospital._
 
+<br />
+
+<img src="AURA%20Carelink%20workflow.jpeg" alt="AURA CareLink — Complete Platform Overview: workflow, modules, key features, AURA Sentinel Engine, system architecture and technology stack" width="100%" />
+
+_Complete platform overview — workflow, modules, features, architecture & tech stack_
+
 </div>
 
 ---
@@ -64,9 +70,22 @@ The platform provides:
 
 # Platform Workflow
 
-The complete AURA CareLink workflow is shown below.
+The end-to-end patient journey, as illustrated in the [platform overview](AURA%20Carelink%20workflow.jpeg) above:
 
-![AURA CareLink Workflow](<AURA Carelink workflow.jpeg>)
+| Step | Stage                          | What Happens                                                |
+| ---- | ------------------------------ | ----------------------------------------------------------- |
+| 1    | Hospital Discharge             | Patient is discharged with a medical summary                 |
+| 2    | AI Discharge Summary Simplifier | Report converted into simple, multilingual instructions      |
+| 3    | Recovery Profile Creation      | Patient health profile generated                             |
+| 4    | Recovery Twin™ Dashboard       | Live digital recovery profile activated                      |
+| 5    | Daily Monitoring & Check-ins   | Patient logs daily updates (offline supported)               |
+| 6    | Data Collection                | Symptoms, medications, vitals, activity, follow-ups captured |
+| 7    | AURA Sentinel Engine™          | AI/ML models analyse patterns across collected data          |
+| 8    | Risk Prediction & Analysis     | Readmission risk, recovery score & relapse risk computed     |
+| 9    | Smart Escalation Engine        | Risk classified as Low / Moderate / High                     |
+| 10   | Alerts & Notifications         | Doctors and caregivers alerted on threshold breach           |
+| 11   | Doctor / Caregiver Action      | Consultation, intervention or follow-up scheduled            |
+| 12   | Continuous Recovery & Support  | Loop continues until full recovery                           |
 
 ---
 
