@@ -1,52 +1,101 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { api, getUser } from "./api";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { api, subscribeToStorage, TOKEN_KEY, USER_KEY } from "./api";
+
+const noopSubscribe = () => () => {};
+
+/**
+ * True once the component is running in the browser.
+ *
+ * Uses useSyncExternalStore rather than a setState-in-effect so the value is
+ * available on the first client render and React never schedules a cascading
+ * re-render for it.
+ */
+export function useMounted() {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+}
+
+function useStoredValue(key) {
+  return useSyncExternalStore(
+    subscribeToStorage,
+    () => window.localStorage.getItem(key),
+    () => null,
+  );
+}
 
 /**
  * Fetch one endpoint and track loading/error state.
  *
- * Returns `reload` so a screen can refresh itself after a mutation without a
- * full page navigation.
+ * `reload` refetches without clearing what is already on screen, so refreshing
+ * after a mutation does not flash a skeleton.
  */
 export function useApi(path, { params, skip = false } = {}) {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(!skip);
+  const [state, setState] = useState({
+    data: null,
+    error: null,
+    loading: !skip,
+  });
 
+  // params is an object literal at most call sites, so compare it by value.
   const key = JSON.stringify(params ?? null);
 
-  const load = useCallback(async () => {
-    if (skip) return;
-    setLoading(true);
-    setError(null);
+  const reload = useCallback(async () => {
     try {
-      setData(await api.get(path, params));
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      const data = await api.get(path, params ?? undefined);
+      setState({ data, error: null, loading: false });
+    } catch (error) {
+      setState((previous) => ({ ...previous, error, loading: false }));
     }
-    // params is compared by value through `key`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, key]);
+
+  useEffect(() => {
+    if (skip) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api.get(path, params ?? undefined);
+        if (!cancelled) setState({ data, error: null, loading: false });
+      } catch (error) {
+        if (!cancelled) {
+          setState((previous) => ({ ...previous, error, loading: false }));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, key, skip]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  return { data, error, loading, reload: load };
+  return { ...state, reload };
 }
 
-/** The signed-in user, read once on mount. */
+/** The signed-in user, read straight from storage. */
 export function useSession() {
-  const [user, setUser] = useState(null);
-  const [ready, setReady] = useState(false);
+  const raw = useStoredValue(USER_KEY);
+  const mounted = useMounted();
 
-  useEffect(() => {
-    setUser(getUser());
-    setReady(true);
-  }, []);
+  const user = useMemo(() => {
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }, [raw]);
 
-  return { user, ready };
+  return { user, ready: mounted };
+}
+
+/** The raw access token, or null when signed out. */
+export function useToken() {
+  return useStoredValue(TOKEN_KEY);
 }
