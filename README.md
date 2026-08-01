@@ -236,14 +236,15 @@ Schedule emergency follow-up
 
 ### Database
 
-- PostgreSQL
-- Firebase
+- SQLite (via SQLAlchemy for local testing)
+- PostgreSQL *(Planned)*
+- Firebase *(Planned)*
 
 ### AI & LLM
 
-- Gemini API
-- LangChain
-- Retrieval-Augmented Generation (RAG)
+- Gemini API *(Planned)*
+- LangChain *(Planned)*
+- Retrieval-Augmented Generation (RAG) *(Planned)*
 
 ### Machine Learning
 
@@ -252,19 +253,19 @@ Schedule emergency follow-up
 
 ### OCR
 
-- Google Vision API
-- Tesseract
+- Google Vision API *(Planned)*
+- Tesseract *(Planned)*
 
 ### Authentication
 
-- Firebase Authentication
-- JWT
+- JWT (JSON Web Tokens)
+- Firebase Authentication *(Planned)*
 
 ### Deployment
 
-- Docker
-- Render
-- Vercel
+- Vercel (Frontend)
+- Docker *(Planned)*
+- Render *(Planned)*
 
 ---
 
