@@ -46,7 +46,6 @@ export default function SettingsView() {
     );
   }
 
-<<<<<<< HEAD
   async function changeLang(code) {
     setLangCode(code);
     localStorage.setItem("aura.lang", code);
@@ -63,11 +62,6 @@ export default function SettingsView() {
     } catch (err) {
       console.error("Failed to save language to DB", err);
     }
-=======
-  function changeLang(code) {
-    setLangCode(code);
-    localStorage.setItem("aura.lang", code);
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
   }
 
   function signOut() {

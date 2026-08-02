@@ -52,8 +52,6 @@ def current_patient(
     return patient
 
 
-<<<<<<< HEAD
-=======
 def writable_patient(*allowed_roles: str):
     """
     Dependency for endpoints that change a patient's clinical record.
@@ -96,13 +94,11 @@ CLINICAL_TEAM = ("patient", "caregiver", "doctor")
 CAN_RESCORE = ("patient", "caregiver", "doctor", "admin")
 
 
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 @router.get("", response_model=PatientOut)
 def profile(patient: Patient = Depends(current_patient)) -> Patient:
     return patient
 
 
-<<<<<<< HEAD
 @router.patch("/language", response_model=PatientOut)
 def update_language(
     payload: dict,
@@ -119,8 +115,7 @@ def update_language(
     return patient
 
 
-=======
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
+
 @router.get("/vitals", response_model=list[VitalOut])
 def vitals(
     patient: Patient = Depends(current_patient), db: Session = Depends(get_db)
@@ -137,11 +132,7 @@ def vitals(
 @router.post("/vitals", response_model=VitalOut, status_code=status.HTTP_201_CREATED)
 def add_vital(
     payload: VitalCreate,
-<<<<<<< HEAD
-    patient: Patient = Depends(current_patient),
-=======
     patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     db: Session = Depends(get_db),
 ) -> VitalReading:
     reading = VitalReading(patient_id=patient.id, **payload.model_dump())
@@ -168,13 +159,9 @@ def medications(
 def mark_medication(
     medication_id: int,
     payload: MedicationTake,
-<<<<<<< HEAD
-    patient: Patient = Depends(current_patient),
-=======
     # Taking a tablet is the patient's own action, so the hospital side is
     # deliberately excluded here.
     patient: Patient = Depends(writable_patient(*LOGS_OWN_CARE)),
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     db: Session = Depends(get_db),
 ) -> Medication:
     """Mark today's dose as taken or missed, and move adherence accordingly."""
@@ -209,11 +196,7 @@ def symptoms(
 @router.post("/symptoms", response_model=SymptomOut, status_code=status.HTTP_201_CREATED)
 def log_symptom(
     payload: SymptomCreate,
-<<<<<<< HEAD
-    patient: Patient = Depends(current_patient),
-=======
     patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     db: Session = Depends(get_db),
 ) -> Symptom:
     symptom = Symptom(
@@ -258,11 +241,7 @@ def alerts(
 @router.post("/alerts/{alert_id}/ack", response_model=AlertOut)
 def acknowledge_alert(
     alert_id: int,
-<<<<<<< HEAD
-    patient: Patient = Depends(current_patient),
-=======
     patient: Patient = Depends(writable_patient(*CLINICAL_TEAM)),
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     db: Session = Depends(get_db),
 ) -> Alert:
     alert = db.get(Alert, alert_id)

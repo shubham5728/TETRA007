@@ -13,10 +13,7 @@ import {
   RiskPill,
   StatTile,
 } from "@/components/ui";
-<<<<<<< HEAD
-=======
 import { api } from "@/lib/api";
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 import { formatDate, timeAgo } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import LimitWarningBanner from "@/components/LimitWarningBanner";
@@ -47,18 +44,6 @@ export default function DashboardView() {
   const nextAppointment = appointments.data?.[0];
 
   async function refreshAfterDose() {
-<<<<<<< HEAD
-=======
-    // Adherence is an input to the risk model, but /api/sentinel returns the
-    // last stored assessment. Without asking for a re-score first, the
-    // headline Recovery Score and risk stay frozen and the dashboard looks
-    // like it ignored the dose.
-    try {
-      await api.post("/api/sentinel/run", {});
-    } catch {
-      // A failed re-score must not stop the rest of the page refreshing.
-    }
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     await Promise.all([medications.reload(), twin.reload(), sentinel.reload()]);
   }
 

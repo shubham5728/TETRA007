@@ -46,8 +46,6 @@ export function getUser() {
   }
 }
 
-<<<<<<< HEAD
-=======
 /**
  * In-memory cache of GET responses.
  *
@@ -70,16 +68,12 @@ export function clearApiCache() {
   responseCache.clear();
 }
 
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 export function clearSession() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
-<<<<<<< HEAD
-=======
   // Never let the next person to sign in see the last person's data.
   clearApiCache();
->>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 }
 
 /** Doctors, admins and government users must name the patient they are viewing. */
