@@ -57,6 +57,22 @@ def profile(patient: Patient = Depends(current_patient)) -> Patient:
     return patient
 
 
+@router.patch("/language", response_model=PatientOut)
+def update_language(
+    payload: dict,
+    patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+) -> Patient:
+    """Persist the patient's selected language (en / hi / gu) in the database."""
+    lang = payload.get("language", "en")
+    if lang not in ("en", "hi", "gu"):
+        raise HTTPException(status_code=400, detail="Invalid language code. Use: en, hi, or gu")
+    patient.language = lang
+    db.commit()
+    db.refresh(patient)
+    return patient
+
+
 @router.get("/vitals", response_model=list[VitalOut])
 def vitals(
     patient: Patient = Depends(current_patient), db: Session = Depends(get_db)

@@ -30,7 +30,6 @@ All five use the password **`AuraCare2025`**.
 | `patient@auracarelink.com` | Patient | `/dashboard` |
 | `doctor@auracarelink.com` | Doctor | `/doctor-portal` |
 | `caregiver@auracarelink.com` | Caregiver | `/caregiver-portal` |
-| `admin@auracarelink.com` | Hospital Admin | `/sentinel` |
 | `gov@auracarelink.com` | Government Authority | `/settings` |
 
 ## How the risk score works

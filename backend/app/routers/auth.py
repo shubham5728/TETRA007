@@ -30,6 +30,20 @@ def _authenticate(db: Session, email: str, password: str) -> User:
     user = db.scalar(select(User).where(User.email == email.lower().strip()))
     if user is None or not verify_password(password, user.password_hash):
         raise INVALID
+        
+    if user.patient_id is not None:
+        from app.models import ChatMessage, Patient
+        # Delete old chat history
+        db.query(ChatMessage).filter(ChatMessage.patient_id == user.patient_id).delete()
+        
+        # Reset chat credits
+        patient = db.scalar(select(Patient).where(Patient.id == user.patient_id))
+        if patient:
+            patient.chat_credits = 10
+            
+        db.commit()
+        db.refresh(user)
+        
     return user
 
 

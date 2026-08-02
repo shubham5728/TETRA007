@@ -8,6 +8,7 @@ const LANGUAGES = [
   { code: "en", label: "English",  flag: "🇬🇧", native: "English",  tts: "en-IN" },
   { code: "hi", label: "Hindi",    flag: "🇮🇳", native: "हिंदी",    tts: "hi-IN" },
   { code: "gu", label: "Gujarati", flag: "🇮🇳", native: "ગુજરાતી", tts: "gu-IN" },
+  { code: "fr", label: "French",   flag: "🇫🇷", native: "Français", tts: "fr-FR" },
 ];
 
 // ─── Action cards on home screen ──────────────────────────────────────────────
@@ -34,6 +35,18 @@ const getActionCards = (langCode) => {
       { id: "Analyze Medical Reports",   emoji: "📄", title: "મેડિકલ રિપોર્ટ અપલોડ કરો",   sub: "વિશ્લેષણ માટે રિપોર્ટ અપલોડ કરો" },
       { id: "Emergency Assistance",      emoji: "🚨", title: "ઇમરજન્સી સહાય",      sub: "તાત્કાલિક આરોગ્ય સહાય", red: true },
       { id: "Free Chat",                 emoji: "💬", title: "મફત ચેટ",                 sub: "મને કંઈપણ પૂછો" },
+    ];
+  }
+  if (langCode === "fr") {
+    return [
+      { id: "Report Symptoms",           emoji: "🩺", title: "Signaler des symptômes", sub: "Dites-moi comment vous vous sentez" },
+      { id: "Understand My Medicines",   emoji: "💊", title: "Comprendre mes médicaments", sub: "Explication simple d'ordonnance" },
+      { id: "Check Recovery Progress",   emoji: "📈", title: "Vérifier la récupération", sub: "Voir votre jumeau de récupération" },
+      { id: "Upcoming Appointments",     emoji: "📅", title: "Rendez-vous à venir",    sub: "Suivis et tests de laboratoire" },
+      { id: "Find Healthcare Benefits",  emoji: "🏥", title: "Avantages de santé",     sub: "Régimes gouvernementaux" },
+      { id: "Analyze Medical Reports",   emoji: "📄", title: "Analyser des rapports",  sub: "Téléchargez un rapport médical" },
+      { id: "Emergency Assistance",      emoji: "🚨", title: "Assistance d'urgence",   sub: "Soutien de santé immédiat", red: true },
+      { id: "Free Chat",                 emoji: "💬", title: "Chat gratuit",           sub: "Posez-moi n'importe quelle question" },
     ];
   }
   return [
@@ -240,12 +253,22 @@ export default function AuraHealthCompanion() {
   const [showSub, setShowSub] = useState(false);
 
   useEffect(() => {
-    api.get("/api/patient").then(p => setCredits(p.chat_credits)).catch(console.error);
+    api.get("/api/patient").then(p => {
+      setCredits(p.chat_credits);
+      if (p.language) {
+        const dbLang = LANGUAGES.find(l => l.code === p.language);
+        if (dbLang) {
+          setLang(dbLang);
+          localStorage.setItem("aura.lang", dbLang.code);
+        }
+      }
+    }).catch(console.error);
   }, []);
 
   const bottomRef = useRef(null);
   const fileRef = useRef(null);
   const recRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, busy]);
 
@@ -255,10 +278,19 @@ export default function AuraHealthCompanion() {
   const [ttsState, setTtsState] = useState("stopped"); // playing, paused, stopped
   const [currentText, setCurrentText] = useState("");
 
-  const speak = useCallback((text) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    setCurrentText(text);
+  const stopSpeak = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    setTtsState("stopped");
+    setCurrentText("");
+  }, []);
+
+
+  const fallbackSpeak = useCallback((text) => {
+    if (!window.speechSynthesis) return;
     const u = new SpeechSynthesisUtterance(text);
     u.rate = 0.88;
     u.pitch = 1;
@@ -269,42 +301,130 @@ export default function AuraHealthCompanion() {
     u.onpause = () => setTtsState("paused");
     u.onresume = () => setTtsState("playing");
 
-    // Wait for voices to load (needed on Chrome/mobile)
-    const assignVoiceAndSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const targetLang = lang.tts; // e.g. "hi-IN", "gu-IN", "en-IN"
+    let voices = window.speechSynthesis.getVoices();
+    const targetLang = lang.tts;
 
-      // Try exact match first, then prefix match (e.g. "hi")
-      const voice =
-        voices.find((v) => v.lang === targetLang) ||
-        voices.find((v) => v.lang.startsWith(lang.code)) ||
-        (lang.code === "hi" ? voices.find(v => v.name.toLowerCase().includes("hindi")) : null) ||
-        (lang.code === "gu" ? voices.find(v => v.name.toLowerCase().includes("gujarati")) : null) ||
-        voices.find((v) => v.lang.startsWith("en")) ||
-        null;
+    const findVoice = (voiceList) => {
+      return voiceList.find((v) => v.lang === targetLang) ||
+             voiceList.find((v) => v.lang.replace('_', '-').startsWith(lang.code)) ||
+             voiceList.find((v) => v.name.toLowerCase().includes(lang.label.toLowerCase())) ||
+             voiceList.find((v) => v.name.includes(lang.native));
+    };
 
-      if (voice) u.voice = voice;
-      u.lang = targetLang;
+    let voice = findVoice(voices);
+
+    const playVoice = (v) => {
+      if (v) u.voice = v;
+      u.lang = v ? v.lang : targetLang;
       window.speechSynthesis.speak(u);
     };
 
-    if (window.speechSynthesis.getVoices().length > 0) {
-      assignVoiceAndSpeak();
+    if (voice) {
+      playVoice(voice);
     } else {
-      window.speechSynthesis.onvoiceschanged = () => {
-        assignVoiceAndSpeak();
-        window.speechSynthesis.onvoiceschanged = null;
+      let hasPlayed = false;
+      const handleVoicesChanged = () => {
+        if (hasPlayed) return;
+        const newVoices = window.speechSynthesis.getVoices();
+        const newVoice = findVoice(newVoices);
+        if (newVoice) {
+          hasPlayed = true;
+          window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+          playVoice(newVoice);
+        }
       };
+      
+      window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+      
+      setTimeout(() => {
+        if (!hasPlayed) {
+          hasPlayed = true;
+          window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+          playVoice(null);
+        }
+      }, 1000);
+    }
+  }, [lang]);
+
+  const speak = useCallback((text) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    
+    stopSpeak();
+    
+    // Clean markdown and English names to help native TTS
+    let cleanText = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '');
+    setCurrentText(text);
+    
+    const u = new SpeechSynthesisUtterance(cleanText);
+    u.rate = 0.88;
+    u.pitch = 1;
+
+    u.onstart = () => setTtsState("playing");
+    u.onend = () => setTtsState("stopped");
+    u.onerror = () => setTtsState("stopped");
+    u.onpause = () => setTtsState("paused");
+    u.onresume = () => setTtsState("playing");
+
+    let voices = window.speechSynthesis.getVoices();
+    const targetLang = lang.tts;
+
+    const findVoice = (voiceList) => {
+      return voiceList.find((v) => v.lang === targetLang) ||
+             voiceList.find((v) => v.lang.replace('_', '-').startsWith(lang.code)) ||
+             voiceList.find((v) => v.name.toLowerCase().includes(lang.label.toLowerCase())) ||
+             voiceList.find((v) => v.name.includes(lang.native));
+    };
+
+    let voice = findVoice(voices);
+
+    const playVoice = (v) => {
+      if (v) u.voice = v;
+      u.lang = v ? v.lang : targetLang;
+      window.speechSynthesis.speak(u);
+    };
+
+    if (voice) {
+      playVoice(voice);
+    } else {
+      let hasPlayed = false;
+      const handleVoicesChanged = () => {
+        if (hasPlayed) return;
+        const newVoices = window.speechSynthesis.getVoices();
+        const newVoice = findVoice(newVoices);
+        if (newVoice) {
+          hasPlayed = true;
+          window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+          playVoice(newVoice);
+        }
+      };
+      
+      window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+      
+      setTimeout(() => {
+        if (!hasPlayed) {
+          hasPlayed = true;
+          window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+          playVoice(null);
+        }
+      }, 1000);
     }
   }, [lang]);
 
   const pauseSpeak = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setTtsState("paused");
+    }
     if (window.speechSynthesis) window.speechSynthesis.pause();
   }, []);
 
   const resumeSpeak = useCallback(() => {
+    if (audioRef.current && ttsState === "paused") {
+      audioRef.current.play();
+      setTtsState("playing");
+    }
     if (window.speechSynthesis) window.speechSynthesis.resume();
-  }, []);
+  }, [ttsState]);
 
   const replaySpeak = useCallback(() => {
     if (currentText) speak(currentText);
@@ -383,6 +503,17 @@ export default function AuraHealthCompanion() {
         setLang(l);
         localStorage.setItem("aura.lang", l.code);
         setStep("intro");
+        const token = localStorage.getItem("aura.token");
+        if (token) {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/patient/language`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ language: l.code })
+          }).catch(err => console.error("Failed to save lang", err));
+        }
       }} />
     );
   }
@@ -420,8 +551,8 @@ export default function AuraHealthCompanion() {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {credits !== null && (
-            <div title="Credits Remaining" style={{...S.chipBtn, background: credits > 0 ? "#e8f0fe" : "#fef2f2", color: credits > 0 ? "#1665d8" : "#dc2626", border: credits > 0 ? "1px solid #1665d8" : "1px solid #fca5a5", display: "flex", gap: 5, alignItems: "center", cursor: "default"}}>
-              <span style={{ fontSize: 13 }}>💎</span> {credits}
+            <div title="Credits Remaining" style={{...S.chipBtn, background: "#e8f0fe", color: "#1665d8", border: "1px solid #1665d8", display: "flex", gap: 5, alignItems: "center", cursor: "default"}}>
+              <span style={{ fontSize: 13 }}>💎</span> Unlimited
             </div>
           )}
           <button style={S.chipBtn} onClick={() => setStep("lang")}>{lang.flag} {lang.label}</button>

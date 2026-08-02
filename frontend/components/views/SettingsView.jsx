@@ -46,9 +46,22 @@ export default function SettingsView() {
     );
   }
 
-  function changeLang(code) {
+  async function changeLang(code) {
     setLangCode(code);
     localStorage.setItem("aura.lang", code);
+    try {
+      const token = localStorage.getItem("aura.token");
+      await fetch(`${API_BASE}/api/patient/language`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ language: code }),
+      });
+    } catch (err) {
+      console.error("Failed to save language to DB", err);
+    }
   }
 
   function signOut() {
