@@ -46,7 +46,10 @@ class PatientOut(ORMModel):
     village: str
     care_team: str
     chat_credits: int
+<<<<<<< HEAD
     language: str = "en"
+=======
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 
 
 class VitalOut(ORMModel):

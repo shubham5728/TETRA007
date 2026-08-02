@@ -25,8 +25,12 @@ class Patient(Base):
     district: Mapped[str | None] = mapped_column(String(120))
     state: Mapped[str | None] = mapped_column(String(120))
     care_team: Mapped[str] = mapped_column(String(120))
+<<<<<<< HEAD
     chat_credits: Mapped[int] = mapped_column(Integer, default=999999)
     language: Mapped[str] = mapped_column(String(10), default="en")
+=======
+    chat_credits: Mapped[int] = mapped_column(Integer, default=10)
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 
     users: Mapped[list["User"]] = relationship(back_populates="patient")
     vitals: Mapped[list["VitalReading"]] = relationship(

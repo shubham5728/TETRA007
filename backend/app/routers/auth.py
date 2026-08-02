@@ -10,13 +10,24 @@ from app.security import create_access_token, get_current_user, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
+<<<<<<< HEAD
 # Where each role lands after signing in. Hospital Admin and Government
 # Authority reuse the closest existing screen — those workspaces are not built.
+=======
+# Where each role lands after signing in. Each destination must also be in the
+# role's sidebar (frontend/lib/nav.js), or the user arrives somewhere they
+# cannot navigate back to.
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 WORKSPACE_BY_ROLE = {
     "patient": "/dashboard",
     "doctor": "/doctor-portal",
     "caregiver": "/caregiver-portal",
+<<<<<<< HEAD
     "admin": "/sentinel",
+=======
+    # /admin-portal itself has no page; subscriptions is the built admin screen.
+    "admin": "/admin-portal/subscriptions",
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     "gov": "/gov-portal",
 }
 
@@ -30,6 +41,7 @@ def _authenticate(db: Session, email: str, password: str) -> User:
     user = db.scalar(select(User).where(User.email == email.lower().strip()))
     if user is None or not verify_password(password, user.password_hash):
         raise INVALID
+<<<<<<< HEAD
         
     if user.patient_id is not None:
         from app.models import ChatMessage, Patient
@@ -44,6 +56,8 @@ def _authenticate(db: Session, email: str, password: str) -> User:
         db.commit()
         db.refresh(user)
         
+=======
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     return user
 
 

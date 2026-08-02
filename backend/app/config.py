@@ -29,9 +29,12 @@ class Settings(BaseSettings):
     # Optional Gemini key. Without it the simplifier falls back to its
     # rule-based path, which is what runs today.
     gemini_api_key: str | None = None
+<<<<<<< HEAD
     
     # ElevenLabs API key for TTS
     elevenlabs_api_key: str | None = None
+=======
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 
     # OpenAI powers the wording of Care Coordinator replies. It never decides
     # risk level or which buttons appear — that stays with the triage rules in
