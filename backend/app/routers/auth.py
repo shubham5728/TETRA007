@@ -16,7 +16,12 @@ WORKSPACE_BY_ROLE = {
     "patient": "/dashboard",
     "doctor": "/doctor-portal",
     "caregiver": "/caregiver-portal",
+<<<<<<< HEAD
     "admin": "/sentinel",
+=======
+    # /admin-portal itself has no page; subscriptions is the built admin screen.
+    "admin": "/admin-portal/subscriptions",
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     "gov": "/gov-portal",
 }
 
@@ -30,6 +35,23 @@ def _authenticate(db: Session, email: str, password: str) -> User:
     user = db.scalar(select(User).where(User.email == email.lower().strip()))
     if user is None or not verify_password(password, user.password_hash):
         raise INVALID
+<<<<<<< HEAD
+        
+    if user.patient_id is not None:
+        from app.models import ChatMessage, Patient
+        # Delete old chat history
+        db.query(ChatMessage).filter(ChatMessage.patient_id == user.patient_id).delete()
+        
+        # Reset chat credits
+        patient = db.scalar(select(Patient).where(Patient.id == user.patient_id))
+        if patient:
+            patient.chat_credits = 10
+            
+        db.commit()
+        db.refresh(user)
+        
+=======
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     return user
 
 

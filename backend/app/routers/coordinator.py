@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+import logging
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException
@@ -8,7 +12,11 @@ from pydantic import BaseModel, Field
 from app.database import get_db
 from app.ml.simplifier import simplify
 from app.models import ChatMessage, Medication, Patient, Appointment, Symptom, Alert, RecoveryScorePoint
+<<<<<<< HEAD
 from app.routers.patient import current_patient
+=======
+from app.routers.patient import LOGS_OWN_CARE, current_patient, writable_patient
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 from app.schemas import (
     ChatMessageOut,
     ChatSend,
@@ -21,6 +29,11 @@ from google.genai import types
 from app.services import latest_assessment, run_assessment
 from app.config import settings
 
+<<<<<<< HEAD
+=======
+logger = logging.getLogger(__name__)
+
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 router = APIRouter(prefix="/api", tags=["coordinator"])
 
 # Words that mean the assistant should re-score the patient straight away
@@ -47,6 +60,30 @@ LANGUAGE_NAMES = {
     "gu": "Gujarati",
 }
 
+<<<<<<< HEAD
+=======
+# Shown when Gemini cannot be reached. It never diagnoses or reassures — it
+# points the patient at a human, which is the safe answer when the assistant
+# cannot read their message.
+OFFLINE_REPLY = {
+    "en": (
+        "I could not reach the AI assistant just now. Your medicines, symptoms "
+        "and appointments are still safe in the app. If you feel unwell, please "
+        "contact your doctor or caregiver. If this is an emergency, call 108."
+    ),
+    "hi": (
+        "मैं अभी AI सहायक से संपर्क नहीं कर पाई। आपकी दवाएं, लक्षण और अपॉइंटमेंट "
+        "ऐप में सुरक्षित हैं। तबीयत ठीक न लगे तो अपने डॉक्टर या देखभालकर्ता से "
+        "संपर्क करें। आपात स्थिति में 108 पर कॉल करें।"
+    ),
+    "gu": (
+        "હું અત્યારે AI સહાયક સાથે સંપર્ક કરી શકી નથી. તમારી દવાઓ, લક્ષણો અને "
+        "એપોઇન્ટમેન્ટ એપમાં સુરક્ષિત છે. તબિયત સારી ન લાગે તો તમારા ડૉક્ટર અથવા "
+        "સંભાળ રાખનારનો સંપર્ક કરો. કટોકટીમાં 108 પર કૉલ કરો."
+    ),
+}
+
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 def _reply_for(db: Session, patient: Patient, text: str, language: str = "en") -> tuple[str, str | None]:
     """
     AI assistant powered by Gemini.
@@ -84,6 +121,24 @@ def _reply_for(db: Session, patient: Patient, text: str, language: str = "en") -
                 {"label": "मेडिकल रिपोर्ट अपलोड करें", "action": "upload"},
                 {"label": "AI कोऑर्डिनेटर से बात करें", "action": "chat"}
             ]
+<<<<<<< HEAD
+        elif language == "fr":
+            greeting_text = (
+                f"Bonjour {patient.name}! Je suis le coordinateur de soins AURA. "
+                "Comment puis-je vous aider dans votre récupération aujourd'hui? Veuillez sélectionner une option ci-dessous:"
+            )
+            buttons = [
+                {"label": "Comprendre mes médicaments", "action": "explain"},
+                {"label": "Signaler des symptômes", "action": "symptoms"},
+                {"label": "Vérifier la récupération", "action": "recovery"},
+                {"label": "Rendez-vous à venir", "action": "visits"},
+                {"label": "Avantages de santé", "action": "schemes"},
+                {"label": "Assistance d'urgence", "action": "emergency"},
+                {"label": "Analyser des rapports", "action": "upload"},
+                {"label": "Parler au coordinateur AI", "action": "chat"}
+            ]
+=======
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
         else:
             greeting_text = (
                 f"Hello {patient.name}! I am AURA Care Coordinator. "
@@ -316,28 +371,47 @@ Emergency Call Doctor
     contents = []
     for msg in history:
         role = "user" if msg.sender == "patient" else "model"
-        contents.append(types.Content(role=role, parts=[types.Part.from_text(msg.text)]))
+<<<<<<< HEAD
+        contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg.text)]))
 
-    contents.append(types.Content(role="user", parts=[types.Part.from_text(text)]))
+    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=text)]))
 
     api_key = settings.gemini_api_key or "iAQ.Ab8RN6J242Y11LHhR_lpniubHIhjZzHCJd0claIzNnXi3F4biQ"
-    client = genai.Client(api_key=api_key)
-    config = types.GenerateContentConfig(
-        system_instruction=system_instruction,
-        temperature=0.0,
-        response_mime_type="application/json",
-        response_schema=AssistantResponse
-    )
-
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=contents,
-        config=config,
-    )
-
+    import requests
     import json
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    
+    # Manually format contents for the REST API
+    rest_contents = []
+    for msg in contents:
+        # Assumes types.Content objects are passed or similar structure
+        role = "user" if getattr(msg, "role", "user") == "user" else "model"
+        parts = []
+        for part in getattr(msg, "parts", []):
+            if hasattr(part, "text") and part.text:
+                parts.append({"text": part.text})
+        if parts:
+            rest_contents.append({"role": role, "parts": parts})
+            
+    payload = {
+        "systemInstruction": {
+            "parts": [{"text": system_instruction}]
+        },
+        "contents": rest_contents,
+        "generationConfig": {
+            "temperature": 0.0,
+            "responseMimeType": "application/json",
+            "responseSchema": AssistantResponse.model_json_schema()
+        }
+    }
+
     try:
-        data = json.loads(response.text)
+        res = requests.post(url, headers={"Content-Type": "application/json"}, json=payload)
+        res.raise_for_status()
+        res_json = res.json()
+        response_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+        data = json.loads(response_text)
         reply_text = data.get("reply", response.text)
         symptoms_data = data.get("identified_symptoms", [])
         penalty = data.get("adherence_penalty", 0)
@@ -349,6 +423,62 @@ Emergency Call Doctor
         penalty = 0
         escalation = "Green"
         post_med_reaction = False
+    except Exception as e:
+        # Rules-based fallback (used when Gemini is unavailable or key is missing/invalid)
+        print(f"Gemini API Error: {e}")
+        from app.rules_engine import apply_rules_engine
+        reply_text, escalation = apply_rules_engine(patient, text, assessment, appointments, medications, language)
+        symptoms_data = []
+        penalty = 0
+        post_med_reaction = False
+=======
+        contents.append(
+            types.Content(role=role, parts=[types.Part.from_text(text=msg.text)])
+        )
+
+    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=text)]))
+
+    import json
+
+    # The assistant must survive Gemini being unavailable — an expired key, an
+    # exhausted quota, or a clinic with no internet. Rather than returning a
+    # 500, fall back to a safe reply that tells the patient to contact their
+    # care team, and record nothing we are not sure about.
+    reply_text = None
+    symptoms_data = []
+    penalty = 0
+    escalation = "Green"
+    post_med_reaction = False
+
+    if settings.gemini_api_key:
+        try:
+            client = genai.Client(api_key=settings.gemini_api_key)
+            config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.0,
+                response_mime_type="application/json",
+                response_schema=AssistantResponse,
+            )
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=contents,
+                config=config,
+            )
+            try:
+                data = json.loads(response.text)
+                reply_text = data.get("reply", response.text)
+                symptoms_data = data.get("identified_symptoms", [])
+                penalty = data.get("adherence_penalty", 0)
+                escalation = data.get("escalation_level", "Green")
+                post_med_reaction = data.get("post_medication_reaction", False)
+            except json.JSONDecodeError:
+                reply_text = response.text
+        except Exception as exc:  # bad key, no quota, network, API change
+            logger.warning("Gemini call failed (%s); using the offline reply", exc)
+
+    if not reply_text:
+        reply_text = OFFLINE_REPLY.get(language, OFFLINE_REPLY["en"])
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 
     # ── Inject DB updates ────────────────────────────────────────────────────
     # 1. Log symptoms
@@ -422,9 +552,25 @@ Emergency Call Doctor
 
     buttons_json = None
     if escalation == "Yellow":
+<<<<<<< HEAD
+        btn_label = {
+            "hi": "डॉक्टर अपॉइंटमेंट बुक करें",
+            "gu": "ડૉક્ટર એપોઇન્ટમેન્ટ બુક કરો",
+            "fr": "Prendre un rendez-vous chez le médecin"
+        }.get(language, "Book Doctor Appointment")
+        buttons_json = json.dumps([{"label": btn_label, "action": "appointments"}])
+    elif escalation == "Red":
+        btn_label = {
+            "hi": "आपातकालीन डॉक्टर को कॉल करें",
+            "gu": "ઈમરજન્સી ડૉક્ટરને કૉલ કરો",
+            "fr": "Appeler un médecin d'urgence"
+        }.get(language, "Emergency Call Doctor")
+        buttons_json = json.dumps([{"label": btn_label, "action": "emergency"}])
+=======
         buttons_json = json.dumps([{"label": "Book Doctor Appointment", "action": "appointments"}])
     elif escalation == "Red":
         buttons_json = json.dumps([{"label": "Emergency Call Doctor", "action": "emergency"}])
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 
     return reply_text, buttons_json
 
@@ -445,12 +591,23 @@ def chat_history(
 @router.post("/chat", response_model=list[ChatMessageOut], status_code=status.HTTP_201_CREATED)
 def send_message(
     payload: ChatSend,
+<<<<<<< HEAD
     patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db),
+) -> list[ChatMessage]:
+    """Store the patient's message and the assistant's reply, returning both."""
+    # if patient.chat_credits <= 0:
+    #     raise HTTPException(status_code=402, detail="You have used all your available AI Health Companion credits.")
+=======
+    # Writes a message *as* the patient, spends their chat credits and can log
+    # symptoms against their record, so it is limited to the patient side.
+    patient: Patient = Depends(writable_patient(*LOGS_OWN_CARE)),
     db: Session = Depends(get_db),
 ) -> list[ChatMessage]:
     """Store the patient's message and the assistant's reply, returning both."""
     if patient.chat_credits <= 0:
         raise HTTPException(status_code=402, detail="You have used all your available AI Health Companion credits.")
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     
     now = datetime.now(timezone.utc)
 
@@ -460,7 +617,12 @@ def send_message(
     db.add(question)
     db.flush()
 
+<<<<<<< HEAD
+    # Use payload language as override; if not provided, DB language is used inside _reply_for
+    reply_text, buttons_json = _reply_for(db, patient, payload.text, payload.language or "")
+=======
     reply_text, buttons_json = _reply_for(db, patient, payload.text, payload.language)
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
 
     answer = ChatMessage(
         patient_id=patient.id,
@@ -470,7 +632,11 @@ def send_message(
         created_at=now,
     )
     db.add(answer)
+<<<<<<< HEAD
+    # patient.chat_credits -= 1
+=======
     patient.chat_credits -= 1
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     db.commit()
     db.refresh(question)
     db.refresh(answer)
@@ -499,12 +665,22 @@ class ReportAnalysisResult(BaseModel):
 async def upload_report(
     file: UploadFile = File(...),
     language: str = Form("en"),
+<<<<<<< HEAD
     patient: Patient = Depends(current_patient),
+    db: Session = Depends(get_db)
+) -> list[ChatMessage]:
+    """Upload a medical report (PDF/image), analyze it via Gemini, and add it to the chat."""
+    # if patient.chat_credits <= 0:
+    #     raise HTTPException(status_code=402, detail="You have used all your available AI Health Companion credits.")
+=======
+    # Same reasoning as /chat — this writes into the patient's transcript.
+    patient: Patient = Depends(writable_patient(*LOGS_OWN_CARE)),
     db: Session = Depends(get_db)
 ) -> list[ChatMessage]:
     """Upload a medical report (PDF/image), analyze it via Gemini, and add it to the chat."""
     if patient.chat_credits <= 0:
         raise HTTPException(status_code=402, detail="You have used all your available AI Health Companion credits.")
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
         
     if not (file.content_type.startswith("image/") or file.content_type == "application/pdf"):
         raise HTTPException(status_code=400, detail="File must be an image or PDF.")
@@ -536,14 +712,61 @@ async def upload_report(
     - extracted_text: The raw text extracted from the OCR (in its original language).
     """
 
+<<<<<<< HEAD
     ocr_api_key = settings.gemini_api_key or "iAQ.Ab8RN6J242Y11LHhR_lpniubHIhjZzHCJd0claIzNnXi3F4biQ"
-    client = genai.Client(api_key=ocr_api_key)
+    import requests
+    import json
+    import base64
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={ocr_api_key}"
+    
+    payload = {
+        "contents": [{
+            "role": "user",
+            "parts": [
+                {
+                    "inlineData": {
+                        "mimeType": file.content_type,
+                        "data": base64.b64encode(content).decode("utf-8")
+                    }
+                },
+                {
+                    "text": prompt
+                }
+            ]
+        }],
+        "generationConfig": {
+            "temperature": 0.2,
+            "responseMimeType": "application/json",
+            "responseSchema": ReportAnalysisResult.model_json_schema()
+        }
+    }
+    
+    try:
+        res = requests.post(url, headers={"Content-Type": "application/json"}, json=payload)
+        res.raise_for_status()
+        res_json = res.json()
+        response_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+        data = json.loads(response_text)
+    except Exception as e:
+        print(f"Report Analysis Error: {e}")
+        # If API is exhausted or parsing fails, return a friendly fallback
+        data = {
+            "smart_summary": "API Quota Exceeded. Please try again later.",
+            "explain_like_im_a_patient": "The AI is currently at capacity and cannot parse this report right now.",
+=======
+    if not settings.gemini_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Report analysis is unavailable right now. Please try again later.",
+        )
+    client = genai.Client(api_key=settings.gemini_api_key)
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=[
             types.Content(role="user", parts=[
                 types.Part.from_bytes(data=content, mime_type=file.content_type),
-                types.Part.from_text(prompt)
+                types.Part.from_text(text=prompt),
             ])
         ],
         config=types.GenerateContentConfig(
@@ -559,6 +782,7 @@ async def upload_report(
         data = {
             "smart_summary": "Analysis failed.",
             "explain_like_im_a_patient": "Could not parse report.",
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
             "risk_level": "Unknown",
             "recommended_specialist": None,
             "extracted_text": ""
@@ -609,8 +833,46 @@ async def upload_report(
         created_at=now,
     )
     db.add(answer)
+<<<<<<< HEAD
+    # patient.chat_credits -= 1
+=======
     patient.chat_credits -= 1
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
     db.commit()
     db.refresh(question)
     db.refresh(answer)
     return [question, answer]
+<<<<<<< HEAD
+
+
+from typing import Optional
+class TTSRequest(BaseModel):
+    text: str
+    voice_id: Optional[str] = None
+    language: str = "en"
+
+@router.post("/tts")
+async def text_to_speech(req: TTSRequest):
+    try:
+        from gtts import gTTS
+        import io
+        from fastapi.responses import StreamingResponse
+        from fastapi import HTTPException
+        
+        # Determine language code for gTTS (it uses standard codes like en, hi, gu, fr)
+        lang_code = req.language
+        if lang_code not in ["en", "hi", "gu", "fr"]:
+            lang_code = "en"
+            
+        tts = gTTS(text=req.text, lang=lang_code)
+        mp3_fp = io.BytesIO()
+        tts.write_to_fp(mp3_fp)
+        mp3_fp.seek(0)
+        
+        return StreamingResponse(mp3_fp, media_type="audio/mpeg")
+    except Exception as e:
+        print(f"gTTS error: {e}")
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=str(e))
+=======
+>>>>>>> dd4f47c3681091a37c2e326454fd9dc16645af09
