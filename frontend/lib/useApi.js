@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { api, subscribeToStorage, TOKEN_KEY, USER_KEY } from "./api";
+import {
+  api,
+  readCache,
+  subscribeToStorage,
+  TOKEN_KEY,
+  USER_KEY,
+  viewingPatientId,
+  writeCache,
+} from "./api";
 
 const noopSubscribe = () => () => {};
 
@@ -35,32 +43,51 @@ function useStoredValue(key) {
  * after a mutation does not flash a skeleton.
  */
 export function useApi(path, { params, skip = false } = {}) {
-  const [state, setState] = useState({
-    data: null,
-    error: null,
-    loading: !skip,
-  });
-
   // params is an object literal at most call sites, so compare it by value.
   const key = JSON.stringify(params ?? null);
+
+  // The viewed patient is injected into the request by api.js, so two doctors
+  // looking at different patients must not share a cache entry.
+  const cacheKey = `${path}|${key}|${
+    typeof window === "undefined" ? "" : viewingPatientId() ?? ""
+  }`;
+
+  const [state, setState] = useState(() => {
+    if (skip) return { data: null, error: null, loading: false };
+    const cached = readCache(cacheKey);
+    // Paint immediately from cache; the effect below revalidates.
+    return cached !== undefined
+      ? { data: cached, error: null, loading: false }
+      : { data: null, error: null, loading: true };
+  });
 
   const reload = useCallback(async () => {
     try {
       const data = await api.get(path, params ?? undefined);
+      writeCache(cacheKey, data);
       setState({ data, error: null, loading: false });
     } catch (error) {
       setState((previous) => ({ ...previous, error, loading: false }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, key]);
+  }, [path, key, cacheKey]);
 
   useEffect(() => {
     if (skip) return undefined;
+
+    const cached = readCache(cacheKey);
+    if (cached !== undefined) {
+      // Switching routes reuses the hook, so adopt this key's cached value.
+      setState({ data: cached, error: null, loading: false });
+    } else {
+      setState((previous) => ({ ...previous, loading: true }));
+    }
 
     let cancelled = false;
     (async () => {
       try {
         const data = await api.get(path, params ?? undefined);
+        writeCache(cacheKey, data);
         if (!cancelled) setState({ data, error: null, loading: false });
       } catch (error) {
         if (!cancelled) {
@@ -73,7 +100,7 @@ export function useApi(path, { params, skip = false } = {}) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, key, skip]);
+  }, [path, key, skip, cacheKey]);
 
   return { ...state, reload };
 }

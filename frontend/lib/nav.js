@@ -16,7 +16,7 @@ export const navItems = [
   { href: "/doctor-portal?tab=settings", label: "Doctor Profile & Settings", icon: "settings", roles: ["doctor"] },
 
   { href: "/caregiver-portal", label: "Caregiver Portal", icon: "users", roles: ["caregiver"] },
-  { href: "/admin-portal", label: "Admin Portal", icon: "hospital", roles: ["admin"] },
+  { href: "/admin-portal/subscriptions", label: "Admin Portal", icon: "hospital", roles: ["admin"] },
   { href: "/gov-portal", label: "Government Schemes", icon: "bank", roles: ["gov"] },
   { href: "/appointments", label: "Appointments", icon: "calendar", roles: ["patient", "caregiver"] },
   { href: "/settings", label: "Settings", icon: "settings", roles: ["patient", "caregiver", "admin", "gov"] },

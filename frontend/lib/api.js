@@ -46,10 +46,34 @@ export function getUser() {
   }
 }
 
+/**
+ * In-memory cache of GET responses.
+ *
+ * Every screen fetches on the client, so without this, moving between pages
+ * refetches everything and shows a skeleton each time. With it, a page you
+ * have already opened paints instantly from cache and quietly revalidates in
+ * the background. Memory only, so a refresh starts clean.
+ */
+const responseCache = new Map();
+
+export function readCache(key) {
+  return responseCache.get(key);
+}
+
+export function writeCache(key, value) {
+  responseCache.set(key, value);
+}
+
+export function clearApiCache() {
+  responseCache.clear();
+}
+
 export function clearSession() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
+  // Never let the next person to sign in see the last person's data.
+  clearApiCache();
 }
 
 /** Doctors, admins and government users must name the patient they are viewing. */

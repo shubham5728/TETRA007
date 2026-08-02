@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException
@@ -8,7 +9,7 @@ from pydantic import BaseModel, Field
 from app.database import get_db
 from app.ml.simplifier import simplify
 from app.models import ChatMessage, Medication, Patient, Appointment, Symptom, Alert, RecoveryScorePoint
-from app.routers.patient import current_patient
+from app.routers.patient import LOGS_OWN_CARE, current_patient, writable_patient
 from app.schemas import (
     ChatMessageOut,
     ChatSend,
@@ -20,6 +21,8 @@ from google.genai import types
 
 from app.services import latest_assessment, run_assessment
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["coordinator"])
 
@@ -45,6 +48,27 @@ LANGUAGE_NAMES = {
     "en": "English",
     "hi": "Hindi",
     "gu": "Gujarati",
+}
+
+# Shown when Gemini cannot be reached. It never diagnoses or reassures — it
+# points the patient at a human, which is the safe answer when the assistant
+# cannot read their message.
+OFFLINE_REPLY = {
+    "en": (
+        "I could not reach the AI assistant just now. Your medicines, symptoms "
+        "and appointments are still safe in the app. If you feel unwell, please "
+        "contact your doctor or caregiver. If this is an emergency, call 108."
+    ),
+    "hi": (
+        "मैं अभी AI सहायक से संपर्क नहीं कर पाई। आपकी दवाएं, लक्षण और अपॉइंटमेंट "
+        "ऐप में सुरक्षित हैं। तबीयत ठीक न लगे तो अपने डॉक्टर या देखभालकर्ता से "
+        "संपर्क करें। आपात स्थिति में 108 पर कॉल करें।"
+    ),
+    "gu": (
+        "હું અત્યારે AI સહાયક સાથે સંપર્ક કરી શકી નથી. તમારી દવાઓ, લક્ષણો અને "
+        "એપોઇન્ટમેન્ટ એપમાં સુરક્ષિત છે. તબિયત સારી ન લાગે તો તમારા ડૉક્ટર અથવા "
+        "સંભાળ રાખનારનો સંપર્ક કરો. કટોકટીમાં 108 પર કૉલ કરો."
+    ),
 }
 
 def _reply_for(db: Session, patient: Patient, text: str, language: str = "en") -> tuple[str, str | None]:
@@ -316,39 +340,52 @@ Emergency Call Doctor
     contents = []
     for msg in history:
         role = "user" if msg.sender == "patient" else "model"
-        contents.append(types.Content(role=role, parts=[types.Part.from_text(msg.text)]))
+        contents.append(
+            types.Content(role=role, parts=[types.Part.from_text(text=msg.text)])
+        )
 
-    contents.append(types.Content(role="user", parts=[types.Part.from_text(text)]))
-
-    api_key = settings.gemini_api_key or "iAQ.Ab8RN6J242Y11LHhR_lpniubHIhjZzHCJd0claIzNnXi3F4biQ"
-    client = genai.Client(api_key=api_key)
-    config = types.GenerateContentConfig(
-        system_instruction=system_instruction,
-        temperature=0.0,
-        response_mime_type="application/json",
-        response_schema=AssistantResponse
-    )
-
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=contents,
-        config=config,
-    )
+    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=text)]))
 
     import json
-    try:
-        data = json.loads(response.text)
-        reply_text = data.get("reply", response.text)
-        symptoms_data = data.get("identified_symptoms", [])
-        penalty = data.get("adherence_penalty", 0)
-        escalation = data.get("escalation_level", "Green")
-        post_med_reaction = data.get("post_medication_reaction", False)
-    except json.JSONDecodeError:
-        reply_text = response.text
-        symptoms_data = []
-        penalty = 0
-        escalation = "Green"
-        post_med_reaction = False
+
+    # The assistant must survive Gemini being unavailable — an expired key, an
+    # exhausted quota, or a clinic with no internet. Rather than returning a
+    # 500, fall back to a safe reply that tells the patient to contact their
+    # care team, and record nothing we are not sure about.
+    reply_text = None
+    symptoms_data = []
+    penalty = 0
+    escalation = "Green"
+    post_med_reaction = False
+
+    if settings.gemini_api_key:
+        try:
+            client = genai.Client(api_key=settings.gemini_api_key)
+            config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.0,
+                response_mime_type="application/json",
+                response_schema=AssistantResponse,
+            )
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=contents,
+                config=config,
+            )
+            try:
+                data = json.loads(response.text)
+                reply_text = data.get("reply", response.text)
+                symptoms_data = data.get("identified_symptoms", [])
+                penalty = data.get("adherence_penalty", 0)
+                escalation = data.get("escalation_level", "Green")
+                post_med_reaction = data.get("post_medication_reaction", False)
+            except json.JSONDecodeError:
+                reply_text = response.text
+        except Exception as exc:  # bad key, no quota, network, API change
+            logger.warning("Gemini call failed (%s); using the offline reply", exc)
+
+    if not reply_text:
+        reply_text = OFFLINE_REPLY.get(language, OFFLINE_REPLY["en"])
 
     # ── Inject DB updates ────────────────────────────────────────────────────
     # 1. Log symptoms
@@ -445,7 +482,9 @@ def chat_history(
 @router.post("/chat", response_model=list[ChatMessageOut], status_code=status.HTTP_201_CREATED)
 def send_message(
     payload: ChatSend,
-    patient: Patient = Depends(current_patient),
+    # Writes a message *as* the patient, spends their chat credits and can log
+    # symptoms against their record, so it is limited to the patient side.
+    patient: Patient = Depends(writable_patient(*LOGS_OWN_CARE)),
     db: Session = Depends(get_db),
 ) -> list[ChatMessage]:
     """Store the patient's message and the assistant's reply, returning both."""
@@ -499,7 +538,8 @@ class ReportAnalysisResult(BaseModel):
 async def upload_report(
     file: UploadFile = File(...),
     language: str = Form("en"),
-    patient: Patient = Depends(current_patient),
+    # Same reasoning as /chat — this writes into the patient's transcript.
+    patient: Patient = Depends(writable_patient(*LOGS_OWN_CARE)),
     db: Session = Depends(get_db)
 ) -> list[ChatMessage]:
     """Upload a medical report (PDF/image), analyze it via Gemini, and add it to the chat."""
@@ -536,14 +576,18 @@ async def upload_report(
     - extracted_text: The raw text extracted from the OCR (in its original language).
     """
 
-    ocr_api_key = settings.gemini_api_key or "iAQ.Ab8RN6J242Y11LHhR_lpniubHIhjZzHCJd0claIzNnXi3F4biQ"
-    client = genai.Client(api_key=ocr_api_key)
+    if not settings.gemini_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Report analysis is unavailable right now. Please try again later.",
+        )
+    client = genai.Client(api_key=settings.gemini_api_key)
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=[
             types.Content(role="user", parts=[
                 types.Part.from_bytes(data=content, mime_type=file.content_type),
-                types.Part.from_text(prompt)
+                types.Part.from_text(text=prompt),
             ])
         ],
         config=types.GenerateContentConfig(

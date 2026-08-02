@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.ml import sentinel as engine
 from app.models import Patient, User
-from app.routers.patient import current_patient
+from app.routers.patient import CAN_RESCORE, current_patient, writable_patient
 from app.schemas import DoctorPatientOut, RecoveryTwinOut, SentinelOut
 from app.security import require_roles
 from app.services import (
@@ -34,7 +34,9 @@ def sentinel_latest(
 
 @router.post("/sentinel/run", response_model=SentinelOut)
 def sentinel_run(
-    patient: Patient = Depends(current_patient), db: Session = Depends(get_db)
+    # Re-scoring can raise a clinical alert, so it stays with the care team.
+    patient: Patient = Depends(writable_patient(*CAN_RESCORE)),
+    db: Session = Depends(get_db),
 ) -> dict:
     """Re-score the patient now. Raises an alert if risk crosses the limit."""
     return assessment_to_dict(run_assessment(db, patient))

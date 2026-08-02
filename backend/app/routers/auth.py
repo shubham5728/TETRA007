@@ -10,13 +10,15 @@ from app.security import create_access_token, get_current_user, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-# Where each role lands after signing in. Hospital Admin and Government
-# Authority reuse the closest existing screen — those workspaces are not built.
+# Where each role lands after signing in. Each destination must also be in the
+# role's sidebar (frontend/lib/nav.js), or the user arrives somewhere they
+# cannot navigate back to.
 WORKSPACE_BY_ROLE = {
     "patient": "/dashboard",
     "doctor": "/doctor-portal",
     "caregiver": "/caregiver-portal",
-    "admin": "/sentinel",
+    # /admin-portal itself has no page; subscriptions is the built admin screen.
+    "admin": "/admin-portal/subscriptions",
     "gov": "/gov-portal",
 }
 

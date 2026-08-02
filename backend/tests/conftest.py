@@ -13,6 +13,14 @@ if TEST_DB.exists():
     TEST_DB.unlink()
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB}"
 
+# Tests must never call a language model: it would be slow, spend quota, and
+# make the suite depend on someone else's uptime. Everything asserted here is
+# the deterministic path — which is exactly what has to keep working when the
+# key expires, the quota runs out, or a rural clinic has no internet.
+os.environ["LLM_PROVIDER"] = "none"
+os.environ["GEMINI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = ""
+
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
@@ -53,3 +61,13 @@ def doctor_headers(client):
 @pytest.fixture
 def caregiver_headers(client):
     return {"Authorization": f"Bearer {_login(client, 'caregiver@auracarelink.com')}"}
+
+
+@pytest.fixture
+def admin_headers(client):
+    return {"Authorization": f"Bearer {_login(client, 'admin@auracarelink.com')}"}
+
+
+@pytest.fixture
+def gov_headers(client):
+    return {"Authorization": f"Bearer {_login(client, 'gov@auracarelink.com')}"}
