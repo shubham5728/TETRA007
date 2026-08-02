@@ -140,3 +140,32 @@ export async function login(email, password) {
   saveSession(data.access_token, data.user);
   return data;
 }
+
+export async function registerAccount(userData) {
+  const data = await request("/api/auth/register", {
+    method: "POST",
+    body: userData,
+    auth: false,
+  });
+  saveSession(data.access_token, data.user);
+  return data;
+}
+
+export async function authFetch(path, options = {}) {
+  const method = options.method || "GET";
+  let body = undefined;
+  if (options.body) {
+    body = typeof options.body === "string" ? JSON.parse(options.body) : options.body;
+  }
+  const token = getToken();
+  const url = new URL(path, API_BASE);
+  return fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui";
 import { formatDate, timeAgo } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
+import LimitWarningBanner from "@/components/LimitWarningBanner";
 
 export default function DashboardView() {
   const twin = useApi("/api/recovery-twin");
@@ -23,6 +24,7 @@ export default function DashboardView() {
   const alerts = useApi("/api/patient/alerts");
   const appointments = useApi("/api/patient/appointments");
   const vitals = useApi("/api/patient/vitals");
+  const subscription = useApi("/api/payments/my-subscription");
 
   const sources = [twin, sentinel, medications, alerts, appointments, vitals];
   const loading = sources.some((source) => source.loading);
@@ -46,8 +48,10 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-5">
-      {/* Drop a photo at /public/images/hero-care.jpg and pass it here to
-          replace the gradient panel: <Hero imageSrc="/images/hero-care.jpg" /> */}
+      <LimitWarningBanner
+        warnings={subscription.data?.warnings}
+        hasWarning={subscription.data?.has_80_percent_warning}
+      />
       <Hero imageSrc="/images/hero-care.png" />
 
       {/* ---------------- Live Recovery Twin ---------------- */}

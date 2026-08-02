@@ -19,6 +19,7 @@ export const navItems = [
   { href: "/admin-portal", label: "Admin Portal", icon: "hospital", roles: ["admin"] },
   { href: "/gov-portal", label: "Government Schemes", icon: "bank", roles: ["gov"] },
   { href: "/appointments", label: "Appointments", icon: "calendar", roles: ["patient", "caregiver"] },
+  { href: "/pricing", label: "Plans & Pricing", icon: "shield", badge: "Upgrade", roles: ["patient", "doctor", "caregiver", "admin"] },
   { href: "/settings", label: "Settings", icon: "settings", roles: ["patient", "caregiver", "admin", "gov"] },
 ];
 

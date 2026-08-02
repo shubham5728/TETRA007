@@ -71,17 +71,16 @@ export default function WearablesView() {
           <CardTitle
             eyebrow="Paired devices"
             title="Connected hardware"
-            hint="Optional — the app works fully without any device."
+            hint="Optional - the app works fully without any device."
           />
           <ul className="divide-y divide-line">
             {devices.data.map((device) => (
               <li key={device.id} className="flex items-center gap-4 py-4">
                 <span
-                  className={`grid size-10 shrink-0 place-items-center rounded-xl ${
-                    device.status === "Offline"
-                      ? "bg-surface-soft text-ink-faint"
-                      : "bg-brand-soft text-brand"
-                  }`}
+                  className={`grid size-10 shrink-0 place-items-center rounded-xl ${device.status === "Offline"
+                    ? "bg-surface-soft text-ink-faint"
+                    : "bg-brand-soft text-brand"
+                    }`}
                 >
                   <Icon
                     name={device.status === "Offline" ? "wifiOff" : "watch"}

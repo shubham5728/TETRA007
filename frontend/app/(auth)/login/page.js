@@ -1,7 +1,7 @@
 import LoginForm from "@/components/LoginForm";
 import { BrandMark, Icon } from "@/components/Icons";
 
-export const metadata = { title: "Sign in | AURA CareLink" };
+export const metadata = { title: "Sign In or Create Account | AURA CareLink" };
 
 const assurances = [
   { icon: "shield", label: "Encrypted session security" },

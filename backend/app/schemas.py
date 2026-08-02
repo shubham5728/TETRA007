@@ -15,6 +15,17 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class RegisterRequest(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str = "patient"  # patient | doctor | caregiver
+    hospital: str | None = "AURA Care Hospital"
+    specialization: str | None = "General Medicine"
+    age: int | None = 32
+    gender: str | None = "Female"
+
+
 class UserOut(ORMModel):
     id: int
     email: str

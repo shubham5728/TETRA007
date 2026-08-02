@@ -27,6 +27,12 @@ class Patient(Base):
     care_team: Mapped[str] = mapped_column(String(120))
     chat_credits: Mapped[int] = mapped_column(Integer, default=10)
 
+    # Subscription Usage Counters
+    storage_used_mb: Mapped[float] = mapped_column(Float, default=12.5)
+    ai_symptom_checks_used: Mapped[int] = mapped_column(Integer, default=1)
+    caregivers_count: Mapped[int] = mapped_column(Integer, default=1)
+    family_members_count: Mapped[int] = mapped_column(Integer, default=0)
+
     users: Mapped[list["User"]] = relationship(back_populates="patient")
     vitals: Mapped[list["VitalReading"]] = relationship(
         back_populates="patient", cascade="all, delete-orphan"
@@ -72,6 +78,11 @@ class User(Base):
     # The patient this account is attached to. Doctors and admins see every
     # patient, so this stays null for them.
     patient_id: Mapped[int | None] = mapped_column(ForeignKey("patients.id"))
+
+    # Active Subscription Plan
+    plan_tier: Mapped[str] = mapped_column(String(20), default="basic")
+    billing_cycle: Mapped[str] = mapped_column(String(20), default="free")
+    plan_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     patient: Mapped["Patient | None"] = relationship(back_populates="users")
 
@@ -130,6 +141,11 @@ class DoctorProfile(Base):
     rating: Mapped[float] = mapped_column(Float)
     fee: Mapped[int] = mapped_column(Integer)
     languages: Mapped[str] = mapped_column(String(200))
+
+    # Doctor Plan Usage Counters
+    patients_count: Mapped[int] = mapped_column(Integer, default=24)
+    appointments_month: Mapped[int] = mapped_column(Integer, default=18)
+    ai_prompts_used: Mapped[int] = mapped_column(Integer, default=3)
 
 
 class Appointment(Base):
@@ -303,3 +319,23 @@ class SubscriptionRequest(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     patient: Mapped["Patient"] = relationship()
+
+
+class PaymentOrder(Base):
+    __tablename__ = "payment_orders"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    order_id: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    payment_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    signature: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    plan_tier: Mapped[str] = mapped_column(String(20))
+    role: Mapped[str] = mapped_column(String(20))
+    billing_cycle: Mapped[str] = mapped_column(String(20))
+    amount: Mapped[int] = mapped_column(Integer) # In INR (rupees)
+    currency: Mapped[str] = mapped_column(String(10), default="INR")
+    status: Mapped[str] = mapped_column(String(30), default="created") # created | paid | failed
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    user: Mapped["User"] = relationship()

@@ -41,6 +41,10 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["*"]
 
+    # Razorpay Gateway Credentials
+    razorpay_key_id: str = "rzp_test_aura9988keyid"
+    razorpay_key_secret: str = "aura_carelink_razorpay_secret_key_2026"
+
 
 @lru_cache
 def get_settings() -> Settings:

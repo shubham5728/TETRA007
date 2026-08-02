@@ -69,6 +69,38 @@ def test_me_returns_the_signed_in_user(client, patient_headers):
     assert body["patient_id"] is not None
 
 
+def test_registration_doctor_and_patient(client):
+    doc_res = client.post(
+        "/api/auth/register",
+        json={
+            "name": "Dr. Testing Doctor",
+            "email": "newdoctor@example.com",
+            "password": "password123",
+            "role": "doctor",
+            "specialization": "Cardiology",
+            "hospital": "City Hospital",
+        },
+    )
+    assert doc_res.status_code == 201
+    assert doc_res.json()["workspace"] == "/doctor-portal"
+
+    pat_res = client.post(
+        "/api/auth/register",
+        json={
+            "name": "Testing Patient",
+            "email": "newpatient@example.com",
+            "password": "password123",
+            "role": "patient",
+            "age": 45,
+            "gender": "Male",
+            "hospital": "General Hospital",
+        },
+    )
+    assert pat_res.status_code == 201
+    assert pat_res.json()["workspace"] == "/dashboard"
+
+
+
 # --------------------------------------------------------------------- profile
 
 

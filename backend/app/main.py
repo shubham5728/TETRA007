@@ -7,7 +7,7 @@ from app.config import settings
 from app.database import Base, engine, SessionLocal
 from app.models import Patient
 from app.ml import sentinel as engine_ml
-from app.routers import auth, coordinator, patient, sentinel, gov, doctor, reports, subscriptions
+from app.routers import auth, coordinator, patient, sentinel, gov, doctor, reports, subscriptions, payments
 from app.seed import seed
 
 
@@ -53,6 +53,7 @@ app.include_router(gov.router)
 app.include_router(doctor.router)
 app.include_router(reports.router)
 app.include_router(subscriptions.router)
+app.include_router(payments.router)
 
 @app.get("/api/health", tags=["meta"])
 def health() -> dict:
