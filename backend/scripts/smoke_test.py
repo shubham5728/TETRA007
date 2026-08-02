@@ -131,6 +131,22 @@ def main() -> int:
             twin_after["medication_adherence"] >= twin["medication_adherence"],
         )
 
+        # /api/sentinel serves the last stored assessment, so the headline
+        # numbers only move once a re-score is asked for. The dashboard does
+        # this after a dose; if it stops, the page silently looks frozen.
+        risk_before = client.get(f"{API}/api/sentinel", headers=patient).json()
+        rescored_now = client.post(f"{API}/api/sentinel/run", headers=patient).json()
+        risk_after = client.get(f"{API}/api/sentinel", headers=patient).json()
+        check(
+            "Re-scoring after a dose updates the stored assessment",
+            risk_after["last_run"] != risk_before["last_run"],
+        )
+        check(
+            "The dashboard then reads the new score",
+            risk_after["recovery_score"] == rescored_now["recovery_score"],
+            f"{risk_before['recovery_score']} -> {risk_after['recovery_score']}",
+        )
+
         # ------------------------------------------------------------- symptoms
         section("Recovery Twin — logging a symptom")
         logged = client.post(

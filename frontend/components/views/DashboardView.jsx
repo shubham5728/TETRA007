@@ -13,6 +13,7 @@ import {
   RiskPill,
   StatTile,
 } from "@/components/ui";
+import { api } from "@/lib/api";
 import { formatDate, timeAgo } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -41,6 +42,15 @@ export default function DashboardView() {
   const nextAppointment = appointments.data?.[0];
 
   async function refreshAfterDose() {
+    // Adherence is an input to the risk model, but /api/sentinel returns the
+    // last stored assessment. Without asking for a re-score first, the
+    // headline Recovery Score and risk stay frozen and the dashboard looks
+    // like it ignored the dose.
+    try {
+      await api.post("/api/sentinel/run", {});
+    } catch {
+      // A failed re-score must not stop the rest of the page refreshing.
+    }
     await Promise.all([medications.reload(), twin.reload(), sentinel.reload()]);
   }
 

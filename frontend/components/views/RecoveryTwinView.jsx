@@ -116,7 +116,17 @@ export default function RecoveryTwinView() {
 
   const patient = twin.data.patient;
 
+  /**
+   * Doses and symptoms are both inputs to the risk model, but /api/sentinel
+   * serves the last stored assessment. Ask for a re-score first, otherwise the
+   * Recovery Score stays frozen and the page looks like it ignored the entry.
+   */
   async function refresh() {
+    try {
+      await api.post("/api/sentinel/run", {});
+    } catch {
+      // A failed re-score must not stop the rest of the page refreshing.
+    }
     await Promise.all([twin.reload(), medications.reload(), symptoms.reload()]);
   }
 
@@ -259,7 +269,7 @@ export default function RecoveryTwinView() {
           ) : (
             <p className="text-sm text-ink-soft">Nothing logged yet.</p>
           )}
-          <SymptomLogger onLogged={() => Promise.all([symptoms.reload(), twin.reload()])} />
+          <SymptomLogger onLogged={refresh} />
         </Card>
       </div>
 
